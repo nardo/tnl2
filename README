@@ -1,0 +1,11 @@
+Torque Network Library
+
+The Torque Network Library is a high-level networking API for real-time simulations with primitives for remote procedure call and object state replication.  The Torque Network Library relies on the Torque Network Platform for low-level networking support.
+
+Directory structure overview:
+
+license:
+	source code licensing information.  The Torque Network Library
+	is released under the GNU General Public License
+	See: http://www.gnu.org/licenses/gpl.html
+
