@@ -9,3 +9,11 @@ license:
 	is released under the GNU General Public License
 	See: http://www.gnu.org/licenses/gpl.html
 
+tnl-1.5.0:
+	Last public version of TNL released on SourceForge.
+
+tnl-1.N:
+	Some later version of TNL from ZAP post core/net split
+
+tnl-_next:
+	Some even later version of the code with a new style of compilation
