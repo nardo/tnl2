@@ -29,7 +29,7 @@
 #import "MyOpenGLView.h"
 #include "testGame.h"
 
-class TestGameLog : public LogConsumer
+class TestGameLog : public TNL::LogConsumer
 {
    id myView;
 public:
@@ -97,9 +97,9 @@ TestGameLog *theLog;
 - (void) drawRect: (NSRect) rect
 {
    if(clientGame)
-      clientGame->renderFrame((U32) rect.size.width, (U32) rect.size.height);
+	   clientGame->renderFrame((TNL::U32) rect.size.width, (TNL::U32) rect.size.height);
    else if(serverGame)
-      serverGame->renderFrame((U32) rect.size.width, (U32) rect.size.height);
+	   serverGame->renderFrame((TNL::U32) rect.size.width, (TNL::U32) rect.size.height);
       
 	[[self openGLContext] flushBuffer];
 }
@@ -128,8 +128,8 @@ TestGameLog *theLog;
    delete serverGame;
    delete clientGame;
    
-   serverGame = new TestGame(true, Address(IPProtocol, Address::Any, 28999), 
-                                   Address("IP:Broadcast:28999"));
+   serverGame = new TestGame(true, TNL::Address(TNL::IPProtocol, TNL::Address::Any, 28999), 
+                                   TNL::Address("IP:Broadcast:28999"));
    clientGame = NULL;
 }
 
@@ -138,8 +138,8 @@ TestGameLog *theLog;
    delete serverGame;
    delete clientGame;
    serverGame = NULL;
-   clientGame = new TestGame(false, Address(IPProtocol, Address::Any, 0),
-                                    Address("IP:localhost:28999"));
+	clientGame = new TestGame(false, TNL::Address(TNL::IPProtocol, TNL::Address::Any, 0),
+							  TNL::Address("IP:localhost:28999"));
 }
 
 - (void)restartAsClient:sender
@@ -147,18 +147,18 @@ TestGameLog *theLog;
    delete serverGame;
    delete clientGame;
    serverGame = NULL;
-   clientGame = new TestGame(false, Address(IPProtocol, Address::Any, 0),
-                                    Address("IP:broadcast:28999"));
+	clientGame = new TestGame(false, TNL::Address(TNL::IPProtocol, TNL::Address::Any, 0),
+                                    TNL::Address("IP:broadcast:28999"));
 }
 
 - (void)restartAsClientAndServer:sender
 {
    delete serverGame;
    delete clientGame;
-   serverGame = new TestGame(true, Address(IPProtocol, Address::Any, 28999), 
-                                   Address("IP:Broadcast:28999"));
-   clientGame = new TestGame(false, Address(IPProtocol, Address::Any, 0),
-                                    Address("IP:broadcast:28999"));
+   serverGame = new TestGame(true, TNL::Address(TNL::IPProtocol, TNL::Address::Any, 28999), 
+                                   TNL::Address("IP:Broadcast:28999"));
+   clientGame = new TestGame(false, TNL::Address(TNL::IPProtocol, TNL::Address::Any, 0),
+                                    TNL::Address("IP:broadcast:28999"));
                                     
    clientGame->createLocalConnection(serverGame);
 }

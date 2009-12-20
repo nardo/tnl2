@@ -36,6 +36,10 @@
 #include "tnlPlatform.h"
 #endif
 
+#ifndef _TNL_ASSERT_H_
+#include "tnlAssert.h"
+#endif
+
 #define VectorBlockSize 16
 
 namespace TNL {
@@ -94,10 +98,11 @@ template<class T> class Vector
    S32 size() const;
    bool empty() const;
 
+	/*
    T&       front();
    const T& front() const;
    T&       back();
-   const T& back() const;
+   const T& back() const;*/
 
    void push_front(const T&);
    void push_back(const T&);
@@ -296,7 +301,7 @@ template<class T> inline bool Vector<T>::empty() const
 {
    return (mElementCount == 0);
 }
-
+/*
 template<class T> inline T& Vector<T>::front()
 {
    return *begin();
@@ -315,7 +320,7 @@ template<class T> inline T& Vector<T>::back()
 template<class T> inline const T& Vector<T>::back() const
 {
    return *end();
-}
+}*/
 
 template<class T> inline void Vector<T>::push_front(const T &x)
 {

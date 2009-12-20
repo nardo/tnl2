@@ -295,6 +295,8 @@ typedef unsigned long long  U64;  ///< Compiler independent unsigned 64-bit inte
 #      define TNL_GCC_2
 #    elif __GNUC__ == 3
 #      define TNL_GCC_3
+#    elif __GNUC__ == 4
+#	   define TNL_GCC_4
 #    else
 #      error "TNL: Unsupported version of GCC (see tnlMethodDispatch.cpp)"
 #    endif
