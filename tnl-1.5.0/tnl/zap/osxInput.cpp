@@ -117,20 +117,20 @@ static void HIDGetElementsCFArrayHandler (const void * value, void * parameter)
 
    CFTypeRef refElement = CFTypeRef(value);
 	long elementType, usagePage, usage;
-	CFTypeRef refElementType = CFDictionaryGetValue (refElement, CFSTR(kIOHIDElementTypeKey));
-	CFTypeRef refUsagePage = CFDictionaryGetValue (refElement, CFSTR(kIOHIDElementUsagePageKey));
-	CFTypeRef refUsage = CFDictionaryGetValue (refElement, CFSTR(kIOHIDElementUsageKey));
+	CFTypeRef refElementType = CFDictionaryGetValue ((CFDictionaryRef) refElement, CFSTR(kIOHIDElementTypeKey));
+	CFTypeRef refUsagePage = CFDictionaryGetValue ((CFDictionaryRef) refElement, CFSTR(kIOHIDElementUsagePageKey));
+	CFTypeRef refUsage = CFDictionaryGetValue ((CFDictionaryRef) refElement, CFSTR(kIOHIDElementUsageKey));
    bool isButton = false, isAxis = false;
 
    ControllerElement *theElement = NULL;
-	if ((refElementType) && (CFNumberGetValue (refElementType, kCFNumberLongType, &elementType)))
+	if ((refElementType) && (CFNumberGetValue ((CFNumberRef) refElementType, kCFNumberLongType, &elementType)))
 	{
 		/* look at types of interest */
 		if ((elementType == kIOHIDElementTypeInput_Misc) || (elementType == kIOHIDElementTypeInput_Button) ||
 			(elementType == kIOHIDElementTypeInput_Axis))
 		{
-			if (refUsagePage && CFNumberGetValue (refUsagePage, kCFNumberLongType, &usagePage) &&
-				refUsage && CFNumberGetValue (refUsage, kCFNumberLongType, &usage))
+			if (refUsagePage && CFNumberGetValue ((CFNumberRef) refUsagePage, kCFNumberLongType, &usagePage) &&
+				refUsage && CFNumberGetValue ((CFNumberRef) refUsage, kCFNumberLongType, &usage))
 			{
 				switch (usagePage) /* only interested in kHIDPage_GenericDesktop and kHIDPage_Button */
 				{
@@ -185,9 +185,9 @@ static void HIDGetElementsCFArrayHandler (const void * value, void * parameter)
             CFTypeID type = CFGetTypeID (refElementTop);
             if (type == CFArrayGetTypeID()) /* if element is an array */
             {
-               CFRange range = {0, CFArrayGetCount (refElementTop)};
+               CFRange range = {0, CFArrayGetCount ((CFArrayRef) refElementTop)};
                /* CountElementsCFArrayHandler called for each array member */
-               CFArrayApplyFunction (refElementTop, range, HIDGetElementsCFArrayHandler, NULL);
+               CFArrayApplyFunction ((CFArrayRef) refElementTop, range, HIDGetElementsCFArrayHandler, NULL);
             }
          }
       }
@@ -197,16 +197,16 @@ static void HIDGetElementsCFArrayHandler (const void * value, void * parameter)
 	   long number;
 	   CFTypeRef refType;
 
-	   refType = CFDictionaryGetValue (refElement, CFSTR(kIOHIDElementCookieKey));
-	   if (refType && CFNumberGetValue (refType, kCFNumberLongType, &number))
+	   refType = CFDictionaryGetValue ((CFDictionaryRef) refElement, CFSTR(kIOHIDElementCookieKey));
+	   if (refType && CFNumberGetValue ((CFNumberRef) refType, kCFNumberLongType, &number))
 		   theElement->cookie = (IOHIDElementCookie) number;
-	   refType = CFDictionaryGetValue (refElement, CFSTR(kIOHIDElementMinKey));
-	   if (refType && CFNumberGetValue (refType, kCFNumberLongType, &number))
+	   refType = CFDictionaryGetValue ((CFDictionaryRef) refElement, CFSTR(kIOHIDElementMinKey));
+	   if (refType && CFNumberGetValue ((CFNumberRef) refType, kCFNumberLongType, &number))
 		   theElement->minValue = number;
 
-      refType = CFDictionaryGetValue (refElement, CFSTR(kIOHIDElementMaxKey));
+      refType = CFDictionaryGetValue ((CFDictionaryRef) refElement, CFSTR(kIOHIDElementMaxKey));
 
-	   if (refType && CFNumberGetValue (refType, kCFNumberLongType, &number))
+	   if (refType && CFNumberGetValue ((CFNumberRef) refType, kCFNumberLongType, &number))
 		   theElement->maxValue = number;
 	  logprintf("Cookie = %d min = %d max = %d", theElement->cookie, theElement->minValue, theElement->maxValue);
 	}
@@ -250,20 +250,20 @@ void InitJoystick()
 			
 			if(CFGetTypeID(refCF) == CFStringGetTypeID())
 			{
-				CFIndex bufferSize = CFStringGetLength (refCF) + 1;
+				CFIndex bufferSize = CFStringGetLength ((CFStringRef) refCF) + 1;
 				char * buffer = (char *)malloc (bufferSize);
 				if (buffer)
 				{
-					if (CFStringGetCString (refCF, buffer, bufferSize, CFStringGetSystemEncoding ()))
+					if (CFStringGetCString ((CFStringRef) refCF, buffer, bufferSize, CFStringGetSystemEncoding ()))
 						strncpy(gJoystickName, buffer, MaxJoystickNameLen);
 					free(buffer);
 				}
 			}
 			refCF = CFDictionaryGetValue (hidProperties, CFSTR(kIOHIDPrimaryUsagePageKey));
          long usage, usagePage;
-			CFNumberGetValue (refCF, kCFNumberLongType, &usagePage);
+			CFNumberGetValue ((CFNumberRef) refCF, kCFNumberLongType, &usagePage);
          refCF = CFDictionaryGetValue (hidProperties, CFSTR(kIOHIDPrimaryUsageKey));
-			CFNumberGetValue (refCF, kCFNumberLongType, &usage);
+			CFNumberGetValue ((CFNumberRef) refCF, kCFNumberLongType, &usage);
 
    		if ( (usagePage == kHIDPage_GenericDesktop) &&
 		     ((usage == kHIDUsage_GD_Joystick ||
@@ -275,19 +275,19 @@ void InitJoystick()
 	            CFTypeID type = CFGetTypeID (refElementTop);
 	            if (type == CFArrayGetTypeID()) /* if element is an array */
 	            {
-		            CFRange range = {0, CFArrayGetCount (refElementTop)};
+		            CFRange range = {0, CFArrayGetCount ((CFArrayRef) refElementTop)};
 		            /* CountElementsCFArrayHandler called for each array member */
-		            CFArrayApplyFunction (refElementTop, range, HIDGetElementsCFArrayHandler, NULL);
+		            CFArrayApplyFunction ((CFArrayRef) refElementTop, range, HIDGetElementsCFArrayHandler, NULL);
 
                   IOCFPlugInInterface ** ppPlugInInterface = NULL;
-					S32 score;
+					SInt32 score;
 		            IOReturn result = IOCreatePlugInInterfaceForService (ioHIDDeviceObject, kIOHIDDeviceUserClientTypeID,
 													            kIOCFPlugInInterfaceID, &ppPlugInInterface, &score);
 		            if (result == kIOReturnSuccess)
 		            {
 			            // Call a method of the intermediate plug-in to create the device interface
 			            (*ppPlugInInterface)->QueryInterface (ppPlugInInterface,
-								            CFUUIDGetUUIDBytes (kIOHIDDeviceInterfaceID), (void *) &device);
+								            CFUUIDGetUUIDBytes (kIOHIDDeviceInterfaceID), (void **) &device);
                      if(device)
                      {
                         result = (*device)->open(device, 0);

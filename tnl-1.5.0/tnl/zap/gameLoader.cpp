@@ -29,6 +29,7 @@
 #include "tnlLog.h"
 
 #include <stdio.h>
+#include <unistd.h>
 
 using namespace TNL;
 namespace Zap
@@ -169,6 +170,9 @@ void LevelLoader::initLevelFromFile(const char *file)
    FILE *f = fopen(file, "r");
    if(!f)
    {
+	   char path[1024];
+	   getcwd(path, sizeof(path));
+	   printf("path = %s\n", path);
       logprintf("Unable to open level file %s!!", file);
       return;
    }

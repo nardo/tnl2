@@ -32,6 +32,7 @@
 #if !defined (ZAP_DEDICATED) && !defined (TNL_OS_XBOX)
 
 #include "alInclude.h"
+#include <stdio.h>
 
 using namespace TNL;
 
@@ -194,6 +195,131 @@ void SFXObject::updateMovementParams()
    }
 }
 
+	
+typedef struct                                  /* WAV File-header */
+	{
+		ALubyte  Id[4];
+		ALsizei  Size;
+		ALubyte  Type[4];
+	} WAVFileHdr_Struct;
+
+typedef struct                                  /* WAV Fmt-header */
+	{
+		ALushort Format;
+		ALushort Channels;
+		ALuint   SamplesPerSec;
+		ALuint   BytesPerSec;
+		ALushort BlockAlign;
+		ALushort BitsPerSample;
+	} WAVFmtHdr_Struct;
+
+typedef struct                           /* WAV FmtEx-header */
+	{
+		ALushort Size;
+		ALushort SamplesPerBlock;
+	} WAVFmtExHdr_Struct;
+
+typedef struct                                  /* WAV Smpl-header */
+	{
+		ALuint   Manufalimturer;
+		ALuint   Product;
+		ALuint   SamplePeriod;
+		ALuint   Note;
+		ALuint   FineTune;
+		ALuint   SMPTEFormat;
+		ALuint   SMPTEOffest;
+		ALuint   Loops;
+		ALuint   SamplerData;
+		struct
+		{
+			ALuint Identifier;
+			ALuint Type;
+			ALuint Start;
+			ALuint End;
+			ALuint Frac;
+			ALuint Count;
+		}      Loop[1];
+	} WAVSmplHdr_Struct;
+
+typedef struct                                  /* WAV Chunk-header */
+	{
+		ALubyte  Id[4];
+		ALuint   Size;
+	} WAVChunkHdr_Struct;
+
+//#pragma palimk (pop, alut)                        /* Default alignment */
+
+ALvoid alutLoadWAV(const ALbyte *name,ALenum *format,ALvoid **data,ALsizei *size,ALsizei *freq)
+{
+	WAVChunkHdr_Struct ChunkHdr;
+	WAVFmtExHdr_Struct FmtExHdr;
+	WAVFileHdr_Struct FileHdr;
+	WAVSmplHdr_Struct SmplHdr;
+	WAVFmtHdr_Struct FmtHdr;
+	FILE *Stream;
+	
+	*format=AL_FORMAT_MONO16;
+	*data=NULL;
+	*size=0;
+	*freq=22050;
+	if (name)
+	{
+		Stream=fopen(name,"rb");
+		if (Stream)
+		{
+			fread(&FileHdr,1,sizeof(WAVFileHdr_Struct),Stream);
+			FileHdr.Size=((FileHdr.Size+1)&~1)-4;
+			
+			while (FileHdr.Size!=0)
+			{
+				if (fread(&ChunkHdr,1,sizeof(WAVChunkHdr_Struct),Stream))
+				{
+					if (!memcmp(ChunkHdr.Id,"fmt ",4))
+					{
+						fread(&FmtHdr,1,sizeof(WAVFmtHdr_Struct),Stream);
+						if (FmtHdr.Format!=0x0001)
+						{
+							fread(&FmtExHdr,1,sizeof(WAVFmtExHdr_Struct),Stream);
+							fseek(Stream,ChunkHdr.Size-sizeof(WAVFmtHdr_Struct)-sizeof(WAVFmtExHdr_Struct),SEEK_CUR);
+						} else fseek(Stream,ChunkHdr.Size-sizeof(WAVFmtHdr_Struct),SEEK_CUR);
+						*format=(FmtHdr.Channels==1?
+								 (FmtHdr.BitsPerSample==8?AL_FORMAT_MONO8:AL_FORMAT_MONO16):
+								 (FmtHdr.BitsPerSample==8?AL_FORMAT_STEREO8:AL_FORMAT_STEREO16));
+						*freq=FmtHdr.SamplesPerSec;
+					}
+					else if (!memcmp(ChunkHdr.Id,"data",4))
+					{
+						if (FmtHdr.Format==0x0001)
+						{
+							*size=ChunkHdr.Size;
+							*data=malloc(ChunkHdr.Size+31);
+							if (*data) fread(*data,FmtHdr.BlockAlign,ChunkHdr.Size/FmtHdr.BlockAlign,Stream);
+							memset(((char *)*data)+ChunkHdr.Size,0,31);
+						}
+						else if (FmtHdr.Format==0x0011)
+						{
+							//IMA ADPCM
+						}
+						else if (FmtHdr.Format==0x0055)
+						{
+							//MP3 WAVE
+						}
+					}
+					else if (!memcmp(ChunkHdr.Id,"smpl",4))
+					{
+						fread(&SmplHdr,1,sizeof(WAVSmplHdr_Struct),Stream);
+						fseek(Stream,ChunkHdr.Size-sizeof(WAVSmplHdr_Struct),SEEK_CUR);
+					}
+					else fseek(Stream,ChunkHdr.Size,SEEK_CUR);
+					fseek(Stream,ChunkHdr.Size&1,SEEK_CUR);
+					FileHdr.Size-=(((ChunkHdr.Size+1)&~1)+8);
+				}
+				else break; ///BUG
+			}
+			fclose(Stream);
+		}
+	}
+}
 
 static void unqueueBuffers(S32 sourceIndex)
 {
@@ -367,8 +493,12 @@ void SFXObject::stop()
 void SFXObject::init()
 {
    ALint error;
+#ifdef TNL_OS_MAC_OSX
+	gDevice = alcOpenDevice(NULL);
+#else
    gDevice = alcOpenDevice((ALubyte *) "DirectSound3D");
-   if(!gDevice)
+#endif
+	if(!gDevice)
    {
       logprintf("Failed to intitialize OpenAL.");
       return;
@@ -413,7 +543,8 @@ void SFXObject::init()
       char fileBuffer[256];
       dSprintf(fileBuffer, sizeof(fileBuffer), "sfx/%s", gSFXProfiles[i].fileName);
 #ifdef TNL_OS_MAC_OSX
-      alutLoadWAVFile((ALbyte *) fileBuffer, &format, &data, &size, &freq);
+	   alutLoadWAV((const ALbyte *) fileBuffer,&format,&data,&size,&freq);
+	   //alutLoadWAVFile((ALbyte *) fileBuffer, &format, &data, &size, &freq);
 #else
       alutLoadWAVFile((ALbyte *) fileBuffer, &format, &data, &size, &freq, &loop);
 #endif
@@ -423,7 +554,8 @@ void SFXObject::init()
          return;
       }
       alBufferData(gBuffers[i], format, data, size, freq);
-      alutUnloadWAV(format, data, size, freq);
+	   free(data);
+      //alutUnloadWAV(format, data, size, freq);
       if(alGetError() != AL_NO_ERROR)
       {
          logprintf("Failure (2) loading sound file '%s'", gSFXProfiles[i].fileName);

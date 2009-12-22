@@ -29,7 +29,7 @@
 
 #ifdef TNL_OS_MAC_OSX
 #include <OpenAL/alc.h>
-#include <OpenAL/alut.h>
+#include <OpenAL/al.h>
 #else
 #include <alc.h>
 #include <alut.h>

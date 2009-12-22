@@ -657,10 +657,10 @@ int main(int argc, char **argv)
 #endif
 {
 #ifdef TNL_OS_MAC_OSX
-  char path[1024];
-  strcpy(path, argv[0]);
-  char *pos = strrchr(path, '/');
-  *pos = 0;
+ char path[1024];
+  strcpy(path, "/Work/Torque-Network-Library/tnl-1.5.0/tnl/exe/");
+  //char *pos = strrchr(path, '/');
+  //*pos = 0;
   logprintf("Path = %s", path);
   chdir(path);
 #endif
