@@ -300,7 +300,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(Player, rpcPlayerWillMove,
                             (TNL::StringPtr testString), (testString), 
    TNL::NetClassGroupGameMask, TNL::RPCGuaranteedOrdered, TNL::RPCToGhostParent, 0)
 {
-   TNL::logprintf("Expecting a player move from the connection: %s", testString);
+   TNL::logprintf("Expecting a player move from the connection: %s", testString.getString());
 }
 
 TNL_IMPLEMENT_NETOBJECT_RPC(Player, rpcPlayerDidMove,
