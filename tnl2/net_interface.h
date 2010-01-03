@@ -88,10 +88,7 @@ public:
 			}
 		}
 	}
-	void _process_challenge_response(torque_connection_challenge_response_event *event)
-	{
-		
-	}
+
 	hash_table_array<torque_connection, ref_ptr<net_connection> > _connection_table;
 	typedef hash_table_array<torque_connection, ref_ptr<net_connection> >::pointer connection_pointer;
 	struct connection_type_record
@@ -142,6 +139,19 @@ public:
 		_connection_table.insert(the_torque_connection, the_net_connection);
 	}
 	
+	void _process_challenge_response(torque_connection_challenge_response_event *event)
+	{
+		bit_stream challenge_response(event->challenge_response_data, event->challenge_response_data_size);
+		byte_buffer_ptr public_key = new byte_buffer(event->public_key, event->public_key_size);
+		
+		ref_ptr<net_connection> *the_connection = _connection_table.find(event->connection).value();
+		if(the_connection)
+		{
+			(*the_connection)->set_connection_state(net_connection::state_requesting_connection);
+			(*the_connection)->on_challenge_response(challenge_response, public_key);
+		}
+	}
+		
 	void _process_connection_requested(torque_connection_requested_event *event)
 	{
 		bit_stream key_stream(event->public_key, event->public_key_size);
@@ -321,6 +331,10 @@ public:
 	virtual bool read_connect_request(bit_stream &request_stream, bit_stream &response_stream)
 	{
 		return true;
+	}
+	
+	virtual void on_challenge_response(bit_stream &challenge_response, byte_buffer_ptr &public_key)
+	{
 	}
 	
 	virtual void on_connection_accepted(bit_stream &accept_stream)
