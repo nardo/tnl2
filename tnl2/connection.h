@@ -320,17 +320,17 @@ protected:
    virtual void writePacket(BitStream *bstream, PacketNotify *note) {}
 
 	/// Called when the packet associated with the specified notify is known to have been received by the remote host.  Packets are guaranteed to be notified in the order in which they were sent.
-	virtual void packetReceived(PacketNotify *note)
+	virtual void packet_received(PacketNotify *note)
 	{
 	   if(mStringTable)
-		  mStringTable->packetReceived(&note->stringList);
+		  mStringTable->packet_received(&note->stringList);
 	}
 	
 	/// Called when the packet associated with the specified notify is known to have been not received by the remote host.  Packets are guaranteed to be notified in the order in which they were sent.
-	virtual void packetDropped(PacketNotify *note)
+	virtual void packet_dropped(PacketNotify *note)
 	{
 	   if(mStringTable)
-		  mStringTable->packetDropped(&note->stringList);
+		  mStringTable->packet_dropped(&note->stringList);
 	}
 
    /// Allocates a data record to track data sent on an individual packet.  If you need to track additional notification information, you'll have to override this so you allocate a subclass of PacketNotify with extra fields.
@@ -721,7 +721,7 @@ protected:
 			 }
 		  }
 
-		  packetReceived(note);
+		  packet_received(note);
 	   }
 	   else
 	   {
@@ -745,7 +745,7 @@ protected:
 
 		  }
 
-		  packetDropped(note);
+		  packet_dropped(note);
 	   }
 	   delete note;
 	}

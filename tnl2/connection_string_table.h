@@ -150,7 +150,7 @@ public:
 	}
 
 
-   void packetReceived(PacketList *note)
+   void packet_received(PacketList *note)
 	{
 	   PacketEntry *walk = note->stringHead;
 	   while(walk)
@@ -163,7 +163,7 @@ public:
 	   }
 	}
 	
-   void packetDropped(PacketList *note)
+   void packet_dropped(PacketList *note)
 	{
 	   PacketEntry *walk = note->stringHead;
 	   while(walk)

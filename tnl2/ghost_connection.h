@@ -39,9 +39,9 @@ protected:
    PacketNotify *allocNotify() { return new GhostPacketNotify; }
 
    /// Override to properly update the GhostInfo's for all ghosts that had upates in the dropped packet.
-   void packetDropped(PacketNotify *notify)
+   void packet_dropped(PacketNotify *notify)
 	{
-	   Parent::packetDropped(pnotify);
+	   Parent::packet_dropped(pnotify);
 	   GhostPacketNotify *notify = static_cast<GhostPacketNotify *>(pnotify);
 
 	   GhostRef *packRef = notify->ghostList;
@@ -99,9 +99,9 @@ protected:
 	}
 
    /// Override to update flags associated with the ghosts updated in this packet.
-   void packetReceived(PacketNotify *notify)
+   void packet_received(PacketNotify *notify)
 	{
-	   Parent::packetReceived(pnotify);
+	   Parent::packet_received(pnotify);
 	   GhostPacketNotify *notify = static_cast<GhostPacketNotify *>(pnotify);
 
 	   GhostRef *packRef = notify->ghostList;

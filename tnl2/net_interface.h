@@ -133,6 +133,18 @@ public:
 		return 0;
 	}
 	
+	time _process_start_time;
+	
+	time get_process_start_time()
+	{
+		return _process_start_time;
+	}
+	void check_for_packet_sends()
+	{
+		for(uint32 i = 0; i < _connection_table.size(); i++)
+			(*_connection_table[i].value())->check_packet_send(false, get_process_start_time());
+	}
+		
 	void _add_connection(ref_ptr<net_connection> &the_net_connection, torque_connection the_torque_connection)
 	{
 		the_net_connection->set_torque_connection(the_torque_connection);
@@ -287,88 +299,3 @@ public:
 	torque_socket _socket;
 };
 
-class net_connection : public ref_object
-{
-public:
-	declare_dynamic_class()
-	
-	void set_connection_state(uint32 new_state)
-	{
-		_state = new_state;
-	}
-	
-	uint32 get_connection_state()
-	{
-		return _state;
-	}
-	uint32 _state;
-	
-	net_connection()
-	{
-	}
-	virtual ~net_connection()
-	{
-	}
-	
-	enum
-	{
-		state_start,
-		state_awaiting_challenge_response,
-		state_requesting_connection,
-		state_accepted,
-		state_established,
-		state_rejected,
-		state_timed_out,
-		state_disconnected,
-	};
-	
-	void connect(net_interface *the_interface, const SOCKADDR *remote_address);
-
-	virtual void write_connect_request(bit_stream &connect_stream)
-	{
-	}
-	
-	virtual bool read_connect_request(bit_stream &request_stream, bit_stream &response_stream)
-	{
-		return true;
-	}
-	
-	virtual void on_challenge_response(bit_stream &challenge_response, byte_buffer_ptr &public_key)
-	{
-	}
-	
-	virtual void on_connection_accepted(bit_stream &accept_stream)
-	{
-	}
-
-	virtual void on_connection_rejected(bit_stream &reject_stream)
-	{
-	}
-	
-	virtual void on_connection_disconnected(bit_stream &disconnect_stream)
-	{
-	}
-	
-	virtual void on_connection_timed_out()
-	{
-	}
-	
-	virtual void on_connection_established()
-	{
-	}
-	
-	virtual void on_packet(uint32 sequence, bit_stream &data)
-	{
-	}
-	
-	virtual void on_packet_notify(uint32 send_sequence, bool recvd)
-	{
-	}
-	
-	void set_torque_connection(torque_connection connection)
-	{
-		_connection = connection;
-	}
-protected:
-	torque_connection _connection;
-};
