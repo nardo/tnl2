@@ -84,7 +84,7 @@ enum NetClassGroup {
    NetClassGroupInvalid = NetClassGroupCount,
 };
 
-/// Mask values used to indicate which NetClassGroup(s) a NetObject or NetEvent
+/// Mask values used to indicate which NetClassGroup(s) a NetObject or net_event
 /// can be transmitted through.
 enum NetClassMask {
    NetClassGroupGameMask      = 1 << NetClassGroupGame,
@@ -343,7 +343,7 @@ public:
 
 class SafeObjectRef;
 
-/// Base class for all NetObject, NetEvent, NetConnection and NetInterface instances.
+/// Base class for all NetObject, net_event, NetConnection and NetInterface instances.
 ///
 /// @section TNLObject_references Ways of Referencing Object
 ///

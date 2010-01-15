@@ -1,6 +1,6 @@
 static PoolAllocator<ConnectionStringTable::PacketEntry> packetEntryFreeList;
 
-/// ConnectionStringTable is a helper class to EventConnection for reducing duplicated string data sends
+/// ConnectionStringTable is a helper class to event_connection for reducing duplicated string data sends
 class ConnectionStringTable : public StringTableEntryCompressor
 {
 public:
@@ -25,7 +25,7 @@ public:
       PacketList() { stringHead = stringTail = NULL; }
    };
 
-   /// An entry in the EventConnection's string table
+   /// An entry in the event_connection's string table
    struct Entry {
       StringTableEntry string; ///< Global string table entry of this string
                            ///< will be 0 if this string is unused.

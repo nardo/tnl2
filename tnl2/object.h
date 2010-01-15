@@ -484,7 +484,7 @@ public:
    /// Constructor - initializes the base class's data
    NetObjectRPCEvent(NetObject *destObject, RPCGuaranteeType type, NetObjectRPCDirection dir) :
       RPCEvent(type, RPCDirAny) { mDestObject = destObject; mRPCDirection = dir; }
-   void pack(EventConnection *ps, BitStream *bstream)
+   void pack(event_connection *ps, BitStream *bstream)
 	{
 	   GhostConnection *gc = static_cast<GhostConnection *>(ps);
 	   S32 ghostIndex = -1;
@@ -498,7 +498,7 @@ public:
 	   }
 	}
 
-   void unpack(EventConnection *ps, BitStream *bstream)
+   void unpack(event_connection *ps, BitStream *bstream)
 	{
 	   // make sure this is a valid place for this event to be...
 	   GhostConnection *gc = static_cast<GhostConnection *>(ps);
@@ -521,7 +521,7 @@ public:
 		  gc->setLastError("Invalid Packet.");
 	}
 
-   void process(EventConnection *ps)
+   void process(event_connection *ps)
 	{
 	   if(mDestObject.isNull())
 		  return;
@@ -551,6 +551,6 @@ public: \
    bool checkClassType(Torque::Object *theObject) { return dynamic_cast<className *>(theObject) != NULL; } }; \
    TNL_IMPLEMENT_NETEVENT( RPCEV_##className##_##name, groupMask, rpcVersion ); \
    void className::name args { RPCEV_##className##_##name *theEvent = new RPCEV_##className##_##name(this); theEvent->mFunctorDecl.set argNames ; postRPCEvent(theEvent); } \
-   Torque::NetEvent * className::name##_construct args { RPCEV_##className##_##name *theEvent = new RPCEV_##className##_##name(this); theEvent->mFunctorDecl.set argNames ; return theEvent; } \
+   Torque::net_event * className::name##_construct args { RPCEV_##className##_##name *theEvent = new RPCEV_##className##_##name(this); theEvent->mFunctorDecl.set argNames ; return theEvent; } \
    void className::name##_remote args
 

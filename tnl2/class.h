@@ -29,7 +29,7 @@ enum NetClassGroup
    NetClassGroupInvalid = 32, ///< Invalid net class group
 };
 
-/// Mask values used to indicate which NetClassGroup(s) a NetObject or NetEvent
+/// Mask values used to indicate which NetClassGroup(s) a NetObject or net_event
 /// can be transmitted through.
 enum NetClassGroupMask
 {

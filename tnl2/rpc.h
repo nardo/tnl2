@@ -3,14 +3,14 @@
 
 The Torque Network Library has a powerful, yet simple to use Remote
 Procedure Call framework for passing information through a network
-connection.  Subclasses of EventConnection and NetObject can declare
+connection.  Subclasses of event_connection and NetObject can declare
 member functions using the RPC macros so that when called the function 
-arguments are sent to the remote EventConnection or NetObject(s) associated
+arguments are sent to the remote event_connection or NetObject(s) associated
 with that object.
 
 For example, suppose you have a connection class called SimpleEventConnection:
 @code
-class SimpleEventConnection : public EventConnection
+class SimpleEventConnection : public event_connection
 {
 public:
    TNL_DECLARE_RPC(rpcPrintString, (String theString, U32 messageCount));
@@ -56,7 +56,7 @@ macro used for each method that will be redefined.  The TNL_IMPLEMENT_RPC_OVERRI
 macro should be used outside the declaration of the class to implement
 the body of the new RPC.
 
-Internally the RPC macros construct new NetEvent classes and encapsulate the
+Internally the RPC macros construct new net_event classes and encapsulate the
 function call arguments using the FunctorDecl template classes.  By default
 the following types are allowed as parameters to RPC methods:
 
@@ -96,19 +96,19 @@ to the function over the network, not including the RPC event overhead.
 
 /// Enumeration for valid directions that RPC messages can travel
 enum RPCDirection {
-   RPCDirAny            = NetEvent::DirAny,           ///< This RPC can be sent from the server or the client
-   RPCDirServerToClient = NetEvent::DirServerToClient,///< This RPC can only be sent from the server to the client
-   RPCDirClientToServer = NetEvent::DirClientToServer,///< This RPC can only be sent from the client to the server
+   RPCDirAny            = net_event::DirAny,           ///< This RPC can be sent from the server or the client
+   RPCDirServerToClient = net_event::DirServerToClient,///< This RPC can only be sent from the server to the client
+   RPCDirClientToServer = net_event::DirClientToServer,///< This RPC can only be sent from the client to the server
 };
 
 /// Type of data guarantee this RPC should use
 enum RPCGuaranteeType {
-   RPCGuaranteedOrdered = NetEvent::GuaranteedOrdered, ///< RPC event delivery is guaranteed and will be processed in the order it was sent relative to other ordered events and RPCs
-   RPCGuaranteed        = NetEvent::Guaranteed,        ///< RPC event delivery is guaranteed and will be processed in the order it was received
-   RPCUnguaranteed      = NetEvent::Unguaranteed       ///< Event delivery is not guaranteed - however, the event will remain ordered relative to other unguaranteed events
+   RPCGuaranteedOrdered = net_event::guaranteed_ordered, ///< RPC event delivery is guaranteed and will be processed in the order it was sent relative to other ordered events and RPCs
+   RPCGuaranteed        = net_event::guaranteed,        ///< RPC event delivery is guaranteed and will be processed in the order it was received
+   RPCUnguaranteed      = net_event::unguaranteed       ///< Event delivery is not guaranteed - however, the event will remain ordered relative to other unguaranteed events
 };
 
-/// Macro used to declare the implementation of an RPC method on an EventConnection subclass.
+/// Macro used to declare the implementation of an RPC method on an event_connection subclass.
 ///
 /// The macro should be used in place of a member function parameter declaration,
 /// with the body code (to be executed on the remote side of the RPC) immediately
@@ -122,32 +122,32 @@ public: \
    bool checkClassType(Torque::Object *theObject) { return dynamic_cast<className *>(theObject) != NULL; } }; \
    TNL_IMPLEMENT_NETEVENT( RPC_##className##_##name, groupMask, rpcVersion ); \
    void className::name args { RPC_##className##_##name *theEvent = new RPC_##className##_##name; theEvent->mFunctorDecl.set argNames ; postNetEvent(theEvent); } \
-   Torque::NetEvent * className::name##_construct args { RPC_##className##_##name *theEvent = new RPC_##className##_##name; theEvent->mFunctorDecl.set argNames ; return theEvent; } \
+   Torque::net_event * className::name##_construct args { RPC_##className##_##name *theEvent = new RPC_##className##_##name; theEvent->mFunctorDecl.set argNames ; return theEvent; } \
    void className::name##_test args { RPC_##className##_##name *theEvent = new RPC_##className##_##name; theEvent->mFunctorDecl.set argNames ; Torque::PacketStream ps; theEvent->pack(this, &ps); ps.setBytePosition(0); theEvent->unpack(this, &ps); theEvent->process(this); } \
    void className::name##_remote args
 
 /// Base class for RPC events.
 ///
 /// All declared RPC methods create subclasses of RPCEvent to send data across the wire
-class RPCEvent : public NetEvent
+class RPCEvent : public net_event
 {
 public:
    Functor<BitStream> *mFunctor;
    /// Constructor call from within the rpc<i>Something</i> method generated by the TNL_IMPLEMENT_RPC macro.
    RPCEvent(RPCGuaranteeType gType, RPCDirection dir) {}
-   void pack(EventConnection *ps, BitStream *bstream)
+   void pack(event_connection *ps, BitStream *bstream)
 	{
 	   mFunctor->write(*bstream);
 	}
 
-   void unpack(EventConnection *ps, BitStream *bstream)
+   void unpack(event_connection *ps, BitStream *bstream)
 	{
 	   mFunctor->read(*bstream);
 	}
 
    virtual bool checkClassType(Object *theObject) = 0;
 
-   void process(EventConnection *ps)
+   void process(event_connection *ps)
 	{
 	   if(checkClassType(ps))
 		  mFunctor->dispatch(ps);
@@ -156,7 +156,7 @@ public:
 };
 
 /// Declares an RPC method within a class declaration.  Creates two method prototypes - one for the host side of the RPC call, and one for the receiver, which performs the actual method.
-#define TNL_DECLARE_RPC(name, args) void name args; void name##_test args; virtual Torque::NetEvent * name##_construct args; virtual void name##_remote args
+#define TNL_DECLARE_RPC(name, args) void name args; void name##_test args; virtual Torque::net_event * name##_construct args; virtual void name##_remote args
 
 /// Declares an override to an RPC method declared in a parent class.
 #define TNL_DECLARE_RPC_OVERRIDE(name, args) void name##_remote args
@@ -165,7 +165,7 @@ public:
 #define TNL_IMPLEMENT_RPC_OVERRIDE(className, name, args) \
    void className::name##_remote args
 
-/// Constructs a NetEvent that will represent the specified RPC invocation.  This
+/// Constructs a net_event that will represent the specified RPC invocation.  This
 /// macro is used to construct a single RPC that can then be posted to multiple
 /// connections, instead of allocating an RPCEvent for each connection.
 #define TNL_RPC_CONSTRUCT_NETEVENT(object, rpcMethod, args) (object)->rpcMethod##_construct args

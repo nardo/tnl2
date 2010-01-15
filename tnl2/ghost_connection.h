@@ -1,13 +1,13 @@
-/// GhostConnection is a subclass of EventConnection that manages the transmission (ghosting) and updating of NetObjects over a connection.  The GhostConnection is responsible for doing scoping calculations (on the server side) and transmitting most-recent ghost information to the client.
+/// GhostConnection is a subclass of event_connection that manages the transmission (ghosting) and updating of NetObjects over a connection.  The GhostConnection is responsible for doing scoping calculations (on the server side) and transmitting most-recent ghost information to the client.
 /// Ghosting is the most complex, and most powerful, part of TNL's capabilities. It allows the information sent to clients to be very precisely matched to what they need, so that no excess bandwidth is wasted.  Each GhostConnection has a <b>scope object</b> that is responsible for determining what other NetObject instances are relevant to that connection's client.  Each time GhostConnection sends a packet, NetObject::performScopeQuery() is called on the scope object, which calls GhostConnection::objectInScope() for each relevant object.
 /// Each object that is in scope, and in need of update (based on its maskbits) is given a priority ranking by calling that object's getUpdatePriority() method.  The packet is then filled with updates, ordered by priority. This way the most important updates get through first, with less important updates being sent as space is available.
 /// There is a cap on the maximum number of ghosts that can be active through a GhostConnection at once.  The enum GhostIdBitSize (defaults to 10) determines how many bits will be used to transmit the ID for each ghost, so the maximum number is 2^GhostIdBitSize or 1024.  This can be easily raised; see the  GhostConstants enum.
 /// Each object ghosted is assigned a ghost ID; the client is <b>only</b> aware of the ghost ID. This acts to enhance simulation security, as it becomes difficult to map objects from one connection to another, or to reliably identify objects from ID alone. IDs are also reassigned based on need, making it hard to track objects that have fallen out of scope (as any object which the player shouldn't see would).
 /// resolveGhost() is used on the client side, and resolveObjectFromGhostIndex() on the server side, to convert ghost IDs to object references.
 /// @see NetObject for more information on network object functionality.
-class GhostConnection : public EventConnection
+class GhostConnection : public event_connection
 {
-   typedef EventConnection Parent;
+   typedef event_connection Parent;
    friend class ConnectionMessageEvent;
 public:
    /// GhostRef tracks an update sent in one packet for the ghost of one NetObject.
@@ -27,7 +27,7 @@ public:
    };
 
    /// Notify structure attached to each packet with information about the ghost updates in the packet
-   struct GhostPacketNotify : public EventConnection::EventPacketNotify
+   struct GhostPacketNotify : public event_connection::EventPacketNotify
    {
       GhostRef *ghostList; ///< list of ghosts updated in this packet
       GhostPacketNotify() { ghostList = NULL; }
@@ -35,7 +35,7 @@ public:
 
 protected:
 
-   /// Override of EventConnection's allocNotify, to use the GhostPacketNotify structure.
+   /// Override of event_connection's allocNotify, to use the GhostPacketNotify structure.
    PacketNotify *allocNotify() { return new GhostPacketNotify; }
 
    /// Override to properly update the GhostInfo's for all ghosts that had upates in the dropped packet.
