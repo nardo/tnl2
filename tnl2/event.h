@@ -119,8 +119,8 @@ class net_event : public ref_object
 public:
    enum event_direction {
       bidirectional, ///< This event can be sent from either the initiator or the host of the connection.
-      downstream, ///< This event can only be sent from the host to the initiator
-      upstream, ///< This event can only be sent from the initiator to the host
+      host_to_initiator, ///< This event can only be sent from the host to the initiator
+      initiator_to_host, ///< This event can only be sent from the initiator to the host
    } _event_direction; ///< Direction this event is allowed to travel in the network
 
    enum guarantee_type {

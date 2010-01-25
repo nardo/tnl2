@@ -6,81 +6,109 @@
 ///
 /// @see net_event for a more thorough explanation of how to use events.
 
+enum rpc_direction {
+	rpc_bidirectional, ///< This event can be sent from either the initiator or the host of the connection.
+	rpc_host_to_initiator, ///< This event can only be sent from the host to the initiator
+	rpc_initiator_to_host, ///< This event can only be sent from the initiator to the host
+};
+
+enum rpc_guarantee_type {
+	rpc_guaranteed_ordered = 0, ///< Event delivery is guaranteed and will be processed in the order it was sent relative to other ordered events.
+	rpc_guaranteed = 1, ///< Event delivery is guaranteed and will be processed in the order it was received.
+	rpc_unguaranteed = 2 ///< Event delivery is not guaranteed - however, the event will remain ordered relative to other unguaranteed events.
+};
+
+uint32 hash_buffer(const void *buffer, uint32 len)
+{
+	uint8 *buf = (uint8 *) buffer;
+	uint32 result = 0;
+	while(len--)
+		result = ((result << 8) | (result >> 24)) ^ uint32(*buf++);
+	return result;
+}
+
+template <typename signature> uint32 hash_method(signature the_method)
+{
+	return hash_buffer((void *) &the_method, sizeof(the_method));
+}
+
 class event_connection : public net_connection
 {
+public:
 	typedef net_connection parent;
+protected:
+	class functor_creator
+	{
+	public:
+		virtual functor *create() = 0;
+	};
 	
+	template<typename signature> class functor_creator_decl : public functor_creator
+	{
+		signature f;
+	public:
+		functor_creator_decl(signature sig)
+		{
+			f = sig;
+		}
+		functor *create()
+		{
+			return new functor_decl<signature>(f);
+		}
+	};
+	struct rpc_record
+	{
+		uint32 method_hash;
+		rpc_guarantee_type guarantee_type;
+		rpc_direction direction;
+		functor_creator *creator;
+	};
+	array<rpc_record> rpc_methods;
+
 	/// event_note associates a single event posted to a connection with a sequence number for ordered processing
 	struct event_note
 	{
-		ref_ptr<net_event> _event; ///< A safe reference to the event
-		S32 _sequence_count; ///< the sequence number of this event for ordering
+		ref_ptr<functor> _rpc; ///< A safe reference to the functor
+		uint32 rpc_index; ///< index into rpc_methods array
+		int32 _sequence_count; ///< the sequence number of this event for ordering
 		event_note *_next_event; ///< The next event either on the connection or on the packet_notify
 	};
-public:
 	/// event_packet_notify tracks all the events sent with a single packet
 	struct event_packet_notify : public net_connection::packet_notify
 	{
 		event_note *event_list; ///< linked list of events sent with this packet
 		event_packet_notify() { event_list = NULL; }
 	};
-	
-	event_connection()
+public:	
+	template <typename signature> void register_rpc(signature the_method, rpc_guarantee_type guarantee_type, rpc_direction direction)
 	{
-		// event management data:
-		
-		_notify_event_list = NULL;
-		_send_event_queue_head = NULL;
-		_send_event_queue_tail = NULL;
-		_unordered_send_event_queue_head = NULL;
-		_unordered_send_event_queue_tail = NULL;
-		_wait_seq_events = NULL;
-		
-		_next_send_event_sequence = first_valid_send_event_sequence;
-		_next_receive_event_sequence = first_valid_send_event_sequence;
-		_last_acked_event_sequence = -1;
-		_event_class_count = 0;
-		_event_class_bit_size = 0;
+		rpc_record the_record;
+		the_record.creator = new functor_creator_decl<signature>(the_method);
+		the_record.guarantee_type = guarantee_type;
+		the_record.direction = direction;
+		the_record.method_hash = hash_method(the_method);
+		rpc_methods.push_back(the_record);
 	}
-	
-	~event_connection()
+	template <class T, class A> void rpc(void (T::*method)(A), A arg1)
 	{
-		while(_notify_event_list)
-		{
-			event_note *temp = _notify_event_list;
-			_notify_event_list = temp->_next_event;
-			
-			temp->_event->notify_delivered(this, true);
-			delete temp;
-		}
-		while(_unordered_send_event_queue_head)
-		{
-			event_note *temp = _unordered_send_event_queue_head;
-			_unordered_send_event_queue_head = temp->_next_event;
-			
-			temp->_event->notify_delivered(this, true);
-		}
-		while(_send_event_queue_head)
-		{
-			event_note *temp = _send_event_queue_head;
-			_send_event_queue_head = temp->_next_event;
-			
-			temp->_event->notify_delivered(this, true);
-		}
+		uint32 method_hash = hash_method(method);
+		functor_decl<void (T::*)(A)> *f = new functor_decl<void (T::*)(A)>(method);
+		f->set(arg1);
+		call_rpc(method_hash, f);
+	}	
+	template <class T, class A, class B> void rpc(void (T::*method)(A,B), A arg1, B arg2)
+	{
+		uint32 method_hash = hash_method(method);
+		functor_decl<void (T::*)(A,B)> *f = new functor_decl<void (T::*)(A,B)>(method);
+		f->set(arg1,arg2);
+		call_rpc(method_hash, f);
 	}
-	
-protected:
-	enum 
-	{
-		debug_checksum = 0xF00DBAAD,
-		bit_stream_position_bit_size = 16,
-	};
 	
 	/// Allocates a packet_notify for this connection
 	packet_notify *alloc_notify() { return new event_packet_notify; }
 	
 	/// Override processing to requeue any guaranteed events in the packet that was dropped
-	void packet_dropped(packet_notify *notify)
+	void packet_dropped(packet_notify *pnotify)
 	{
 		parent::packet_dropped(pnotify);
 		event_packet_notify *notify = static_cast<event_packet_notify *>(pnotify);
@@ -91,9 +119,9 @@ protected:
 		
 		while(walk)
 		{
-			switch(walk->_event->_guarantee_type)
+			switch(rpc_methods[walk->rpc_index].guarantee_type)
 			{
-				case net_event::guaranteed_ordered:
+				case rpc_guaranteed_ordered:
 					// It was a guaranteed ordered packet, reinsert it back into
 					// _send_event_queue_head in the right place (based on seq numbers)
 					
@@ -109,7 +137,7 @@ protected:
 					insert_list = &(walk->_next_event);
 					walk = temp;
 					break;
-				case net_event::guaranteed:
+				case rpc_guaranteed:
 					// It was a guaranteed packet, put it at the top of
 					// _unordered_send_event_queue_head.
 					temp = walk->_next_event;
@@ -119,10 +147,9 @@ protected:
 						_unordered_send_event_queue_tail = walk;
 					walk = temp;
 					break;
-				case net_event::unguaranteed:
+				case rpc_unguaranteed:
 					// Or else it was an unguaranteed packet, notify that
 					// it was _not_ delivered and blast it.
-					walk->_event->notify_delivered(this, false);
 					temp = walk->_next_event;
 					delete walk;
 					walk = temp;
@@ -131,7 +158,7 @@ protected:
 	}
 	
 	/// Override processing to notify for delivery and dereference any events sent in the packet
-	void packet_received(packet_notify *notify)
+	void packet_received(packet_notify *pnotify)
 	{
 		parent::packet_received(pnotify);
 		
@@ -143,9 +170,8 @@ protected:
 		while(walk)
 		{
 			event_note *next = walk->_next_event;
-			if(walk->_event->_guarantee_type != net_event::guaranteed_ordered)
+			if(rpc_methods[walk->rpc_index].guarantee_type != rpc_guaranteed_ordered)
 			{
-				walk->_event->notify_delivered(this, true);
 				delete walk;
 				walk = next;
 			}
@@ -165,50 +191,37 @@ protected:
 			_last_acked_event_sequence++;
 			event_note *next = _notify_event_list->_next_event;
 			TorqueLogMessageFormatted(LogEventConnection, ("event_connection %d: NotifyDelivered - %d", get_torque_connection(), _notify_event_list->_sequence_count));
-			_notify_event_list->_event->notify_delivered(this, true);
 			delete _notify_event_list;
 			_notify_event_list = next;
 		}
 	}
 	
 	/// Writes pending events into the packet, and attaches them to the packet_notify
-	void write_packet(bit_stream *bstream, packet_notify *notify)
+	void write_packet(bit_stream &bstream, packet_notify *pnotify)
 	{
 		parent::write_packet(bstream, pnotify);
 		event_packet_notify *notify = static_cast<event_packet_notify *>(pnotify);
-		
-		if(debug_connection())
-			bstream->writeInt(debug_checksum, 32);
 		
 		event_note *packet_queue_head = NULL, *packet_queue_tail = NULL;
 		
 		while(_unordered_send_event_queue_head)
 		{
-			if(bstream->isFull())
+			if(bstream.is_full())
 				break;
 			// get the first event
 			event_note *ev = _unordered_send_event_queue_head;
 			
-			bstream->writeFlag(true);
-			S32 start = bstream->getBitPosition();
+			bstream.write_bool(true);
+			int32 start = bstream.get_bit_position();
 			
-			if(mConnectionParameters.mDebugObjectSizes)
-				bstream->advanceBitPosition(bit_stream_position_bit_size);
-			
-			S32 classId = NetClassRegistry::GetClassIndexOfObject(ev->_event, getNetClassGroup());
-			bstream->writeInt(classId, _event_class_bit_size);
-			
-			ev->_event->pack(this, bstream);
-			TorqueLogMessageFormatted(LogEventConnection, ("event_connection %s: WroteEvent %s - %d bits", getNetAddressString().c_str(), ev->_event->get_debug_name(), bstream->getBitPosition() - start));
-			
-			if(mConnectionParameters.mDebugObjectSizes)
-				bstream->writeIntAt(bstream->getBitPosition(), bit_stream_position_bit_size, start);
-			
-			if(bstream->getBitSpaceAvailable() < MinimumPaddingBits)
+			bstream.write_integer(ev->rpc_index, _rpc_id_bit_size);
+			ev->_rpc->write(bstream);
+			TorqueLogMessageFormatted(LogEventConnection, ("event_connection %d: WroteEvent %d - %d bits", get_torque_connection(), ev->rpc_index, bstream.get_bit_position() - start));
+	
+			if(bstream.get_bit_space_available() < minimum_padding_bits)
 			{
-				// rewind to before the event, and break out of the loop:
-				bstream->setBitPosition(start - 1);
-				bstream->clearError();
+				// rewind to before this RPC
+				bstream.set_bit_position(start - 1);
 				break;
 			}
 			
@@ -223,12 +236,12 @@ protected:
 			packet_queue_tail = ev;
 		}
 		
-		bstream->writeFlag(false);   
-		S32 prevSeq = -2;
+		bstream.write_bool(false);   
+		int32 previous_sequence = -2;
 		
 		while(_send_event_queue_head)
 		{
-			if(bstream->isFull())
+			if(bstream.is_full())
 				break;
 			
 			// if the event window is full, stop processing
@@ -237,36 +250,24 @@ protected:
 			
 			// get the first event
 			event_note *ev = _send_event_queue_head;
-			S32 eventStart = bstream->getBitPosition();
+			int32 eventStart = bstream.get_bit_position();
 			
-			bstream->writeFlag(true);
+			bstream.write_bool(true);
 			
-			if(!bstream->writeFlag(ev->_sequence_count == prevSeq + 1))
-				bstream->writeInt(ev->_sequence_count, 7);
-			prevSeq = ev->_sequence_count;
+			if(!bstream.write_bool(ev->_sequence_count == previous_sequence + 1))
+				bstream.write_integer(ev->_sequence_count, 7);
+			previous_sequence = ev->_sequence_count;
+
+			int32 start = bstream.get_bit_position();
+			bstream.write_integer(ev->rpc_index, _rpc_id_bit_size);
 			
-			if(mConnectionParameters.mDebugObjectSizes)
-				bstream->advanceBitPosition(bit_stream_position_bit_size);
-			
-			S32 start = bstream->getBitPosition();
-			
-			S32 classId = NetClassRegistry::GetClassIndexOfObject(ev->_event, getNetClassGroup());
-			bstream->writeInt(classId, _event_class_bit_size);
-			
-			ev->_event->pack(this, bstream);
-			TorqueLogMessageFormatted(LogEventConnection, ("event_connection wrote class id: %d, name = %s", classId, ev->_event->getClassName()));
-			
-			NetClassRegistry::AddInitialUpdate(ev->_event, bstream->getBitPosition() - start);
-			TorqueLogMessageFormatted(LogEventConnection, ("event_connection %s: WroteEvent %s - %d bits", getNetAddressString().c_str(), ev->_event->get_debug_name(), bstream->getBitPosition() - start));
-			
-			if(mConnectionParameters.mDebugObjectSizes)
-				bstream->writeIntAt(bstream->getBitPosition(), bit_stream_position_bit_size, start - bit_stream_position_bit_size);
-			
-			if(bstream->getBitSpaceAvailable() < MinimumPaddingBits)
+			ev->_rpc->write(bstream);
+			TorqueLogMessageFormatted(LogEventConnection, ("event_connection %d: WroteEvent %d - %d bits", get_torque_connection(), ev->rpc_index, bstream.get_bit_position() - start));
+
+			if(bstream.get_bit_space_available() < minimum_padding_bits)
 			{
 				// rewind to before the event, and break out of the loop:
-				bstream->setBitPosition(eventStart);
-				bstream->clearError();
+				bstream.set_bit_position(eventStart);
 				break;
 			}
 			
@@ -279,113 +280,78 @@ protected:
 				packet_queue_tail->_next_event = ev;
 			packet_queue_tail = ev;
 		}
-		for(event_note *ev = packet_queue_head; ev; ev = ev->_next_event)
-			ev->_event->notify_sent(this);
-		
 		notify->event_list = packet_queue_head;
-		bstream->writeFlag(0);
+		bstream.write_bool(0);
 	}
 	
 	/// Reads events from the stream, and queues them for processing
-	void readPacket(bit_stream *bstream)
+	void read_packet(bit_stream &bstream)
 	{
-		parent::readPacket(bstream);
+		parent::read_packet(bstream);
 		
-		if(mConnectionParameters.mDebugObjectSizes)
-		{
-			U32 sum = bstream->readInt(32);
-			Assert(sum == debug_checksum, "Invalid checksum.");
-		}
-		
-		S32 prevSeq = -2;
-		event_note **waitInsert = &_wait_seq_events;
-		bool unguaranteedPhase = true;
+		int32 previous_sequence = -2;
+		event_note **wait_insert = &_wait_seq_events;
+		bool unguaranteed_phase = true;
 		
 		while(true)
 		{
-			bool bit = bstream->readFlag();
-			if(unguaranteedPhase && !bit)
+			bool bit = bstream.read_bool();
+			if(unguaranteed_phase && !bit)
 			{
-				unguaranteedPhase = false;
-				bit = bstream->readFlag();
+				unguaranteed_phase = false;
+				bit = bstream.read_bool();
 			}
-			if(!unguaranteedPhase && !bit)
+			if(!unguaranteed_phase && !bit)
 				break;
 			
-			S32 seq = -1;
+			int32 seq = -1;
 			
-			if(!unguaranteedPhase) // get the sequence
+			if(!unguaranteed_phase) // get the sequence
 			{
-				if(bstream->readFlag())
-					seq = (prevSeq + 1) & 0x7f;
+				if(bstream.read_bool())
+					seq = (previous_sequence + 1) & 0x7f;
 				else
-					seq = bstream->readInt(7);
-				prevSeq = seq;
+					seq = bstream.read_integer(7);
+				previous_sequence = seq;
 			}
 			
-			U32 endingPosition;
-			if(mConnectionParameters.mDebugObjectSizes)
-				endingPosition = bstream->readInt(bit_stream_position_bit_size);
+			int32 start = bstream.get_bit_position();
+			uint32 rpc_index = bstream.read_integer(_rpc_id_bit_size);
+			if(rpc_index >= _rpc_count)
+				throw tnl_exception_invalid_packet;
 			
-			S32 start = bstream->getBitPosition();
-			U32 classId = bstream->readInt(_event_class_bit_size);
-			if(classId >= _event_class_count)
-			{
-				setLastError("Invalid packet.");
-				return;
-			}
-			net_event *evt = (net_event *) NetClassRegistry::Create(getNetClassGroup(), NetClassTypeEvent, classId);
-			if(!evt)
-			{
-				setLastError("Invalid packet.");
-				return;
-			}
-			TorqueLogMessageFormatted(LogEventConnection, ("event_connection got class id: %d, name = %s", classId, evt->getClassName()));
+			rpc_record &the_rpc = rpc_methods[rpc_index];
+			
+			functor *func = the_rpc.creator->create();
 			
 			// check if the direction this event moves is a valid direction.
-			if(   (evt->get_event_direction() == net_event::DirUnset)
-			   || (evt->get_event_direction() == net_event::DirServerToClient && isConnectionToClient())
-			   || (evt->get_event_direction() == net_event::DirClientToServer && isConnectionToServer()) )
+			if(   (the_rpc.direction == rpc_initiator_to_host && is_connection_host())
+			   || (the_rpc.direction == rpc_host_to_initiator && is_connection_initiator()) )
+				throw tnl_exception_invalid_packet;
+			func->read(bstream);
+			
+			if(unguaranteed_phase)
 			{
-				setLastError("Invalid Packet.");
-				return;
-			}
-			
-			
-			evt->unpack(this, bstream);
-			if(!mErrorString.isEmpty())
-				return;
-			
-			if(mConnectionParameters.mDebugObjectSizes)
-			{
-				AssertFormatted(endingPosition == bstream->getBitPosition(),
-								("unpack did not match pack for event of class %s.",
-								 evt->getClassName().c_str()) );
-			}
-			
-			if(unguaranteedPhase)
-			{
-				processEvent(evt);
-				delete evt;
-				if(!mErrorString.isEmpty())
-					return;
+				process_rpc(func);
+				delete func;
 				continue;
 			}
 			seq |= (_next_receive_event_sequence & ~0x7F);
 			if(seq < _next_receive_event_sequence)
 				seq += 128;
 			
-			event_note *note = mEventNoteChunker.allocate();
-			note->_event = evt;
+			event_note *note = new event_note;
+			note->rpc_index = rpc_index;
+			note->_rpc = func;
 			note->_sequence_count = seq;
-			TorqueLogMessageFormatted(LogEventConnection, ("event_connection %s: RecvdGuaranteed %d", getNetAddressString().c_str(), seq));
+			TorqueLogMessageFormatted(LogEventConnection, ("event_connection %d: RecvdGuaranteed %d", get_torque_connection(), seq));
 			
-			while(*waitInsert && (*waitInsert)->_sequence_count < seq)
-				waitInsert = &((*waitInsert)->_next_event);
+			while(*wait_insert && (*wait_insert)->_sequence_count < seq)
+				wait_insert = &((*wait_insert)->_next_event);
 			
-			note->_next_event = *waitInsert;
-			*waitInsert = note;
-			waitInsert = &(note->_next_event);
+			note->_next_event = *wait_insert;
+			*wait_insert = note;
+			wait_insert = &(note->_next_event);
 		}
 		while(_wait_seq_events && _wait_seq_events->_sequence_count == _next_receive_event_sequence)
 		{
@@ -393,25 +359,23 @@ protected:
 			event_note *temp = _wait_seq_events;
 			_wait_seq_events = temp->_next_event;
 			
-			TorqueLogMessageFormatted(LogEventConnection, ("event_connection %s: ProcessGuaranteed %d", getNetAddressString().c_str(), temp->_sequence_count));
-			processEvent(temp->_event);
-			mEventNoteChunker.deallocate(temp);
-			if(!mErrorString.isEmpty())
-				return;
+			TorqueLogMessageFormatted(LogEventConnection, ("event_connection %d: ProcessGuaranteed %d", get_torque_connection(), temp->_sequence_count));
+			process_rpc(temp->_rpc);
+			delete temp;
 		}
 	}
 	
 	/// Returns true if there are events pending that should be sent across the wire
-	virtual bool isDataToTransmit()
+	virtual bool is_data_to_transmit()
 	{
-		return _unordered_send_event_queue_head || _send_event_queue_head || parent::isDataToTransmit();
+		return _unordered_send_event_queue_head || _send_event_queue_head || parent::is_data_to_transmit();
 	}
 	
 	/// Dispatches an event
-	void processEvent(net_event *theEvent)
+	void process_rpc(functor *the_functor)
 	{
-		if(getConnectionState() == net_connection::Connected)
-			theEvent->process(this);
+		if(get_connection_state() == net_connection::state_established)
+			the_functor->dispatch(this);
 	}
 	
 	
@@ -420,109 +384,48 @@ protected:
 	//----------------------------------------------------------------
 	
 private:
-	static PoolAllocator<event_note> mEventNoteChunker; ///< Quick memory allocator for net event notes
-	
-	event_note *_send_event_queue_head; ///< Head of the list of events to be sent to the remote host
-	event_note *_send_event_queue_tail; ///< Tail of the list of events to be sent to the remote host.  New events are tagged on to the end of this list
-	event_note *_unordered_send_event_queue_head; ///< Head of the list of events sent without ordering information
-	event_note *_unordered_send_event_queue_tail; ///< Tail of the list of events sent without ordering information
-	event_note *_wait_seq_events;   ///< List of ordered events on the receiving host that are waiting on previous sequenced events to arrive.
-	event_note *_notify_event_list; ///< Ordered list of events on the sending host that are waiting for receipt of processing on the client.
-	
-	S32 _next_send_event_sequence; ///< The next sequence number for an ordered event sent through this connection
-	S32 _next_receive_event_sequence; ///< The next receive event sequence to process
-	S32 _last_acked_event_sequence; ///< The last event the remote host is known to have processed
-	
-	enum {
-		InvalidSendEventSeq = -1,
-		first_valid_send_event_sequence = 0
-	};
-	
 protected:
-	U32 _event_class_count; ///< Number of net_event classes supported by this connection
-	U32 _event_class_bit_size; ///< Bit field width of net_event class count.
-	U32 mEventClassVersion; ///< The highest version number of events on this connection.
-	
 	/// Writes the net_event class count into the stream, so that the remote host can negotiate a class count for the connection
-	void writeConnectRequest(bit_stream *stream)
+	void write_connect_request(bit_stream &stream)
 	{
-		parent::writeConnectRequest(stream);
-		U32 classCount = NetClassRegistry::GetClassCount(getNetClassGroup(), NetClassTypeEvent);
-		write(*stream, classCount);
+		parent::write_connect_request(stream);
+		_rpc_count = rpc_methods.size();
+		core::write(stream, _rpc_count);
+		_rpc_id_bit_size = get_next_binary_log(_rpc_count);
 	}
 	
-	/// Reads the net_event class count max that the remote host is requesting.  If this host has MORE net_event classes declared, the _event_class_count  is set to the requested count, and is verified to lie on a boundary between versions.
-	bool readConnectRequest(bit_stream *stream, const char **errorString)
+	/// Reads the net_event class count max that the remote host is requesting.
+	bool read_connect_request(bit_stream &stream, bit_stream &response_stream)
 	{
-		if(!parent::readConnectRequest(stream, errorString))
+		if(!parent::read_connect_request(stream, response_stream))
+			return false;
+
+		core::read(stream, _rpc_count);
+		if(_rpc_count != rpc_methods.size())
 			return false;
 		
-		U32 classCount;
-		read(*stream, &classCount);
-		
-		U32 myCount = NetClassRegistry::GetClassCount(getNetClassGroup(), NetClassTypeEvent);
-		if(myCount <= classCount)
-			_event_class_count = myCount;
-		else
-		{
-			_event_class_count = classCount;
-			if(!NetClassRegistry::IsVersionBorderCount(getNetClassGroup(), NetClassTypeEvent, _event_class_count))
-				return false;
-		}
-		if(!_event_class_count)
-			return false;
-		
-		mEventClassVersion = NetClassRegistry::GetClassVersion(getNetClassGroup(), NetClassTypeEvent, _event_class_count-1);
-		_event_class_bit_size = getNextBinaryLog2(_event_class_count);
+		_rpc_id_bit_size = get_next_binary_log(_rpc_count);
 		return true;
 	}
-	
-	
-	/// Writes the negotiated net_event class count into the stream.   
-	void writeConnectAccept(bit_stream *stream)
-	{
-		parent::writeConnectAccept(stream);
-		write(*stream, _event_class_count);
-	}
-	
-	/// Reads the negotiated net_event class count from the stream and validates that it is on a boundary between versions.
-	bool readConnectAccept(bit_stream *stream, const char **errorString)
-	{
-		if(!parent::readConnectAccept(stream, errorString))
-			return false;
-		
-		read(*stream, &_event_class_count);
-		
-		U32 myCount = NetClassRegistry::GetClassCount(getNetClassGroup(), NetClassTypeEvent);
-		if(_event_class_count > myCount)
-			return false;
-		
-		if(!NetClassRegistry::IsVersionBorderCount(getNetClassGroup(), NetClassTypeEvent, _event_class_count))
-			return false;
-		
-		_event_class_bit_size = getNextBinaryLog2(_event_class_count);
-		return true;
-	}
-	
 	
 public:
-	/// returns the highest event version number supported on this connection.
-	U32 getEventClassVersion() { return mEventClassVersion; }
-	
-	/// Posts a net_event for processing on the remote host
-	bool postNetEvent(net_event *event)
-	{   
-		S32 classId = NetClassRegistry::GetClassIndexOfObject(theEvent, getNetClassGroup());
-		if(U32(classId) >= _event_class_count && getConnectionState() == Connected)
-			return false;
+	void call_rpc(uint32 method_hash, functor *the_functor)
+	{
+		uint32 rpc_index;
+		for(rpc_index = 0 ; rpc_index< rpc_methods.size(); rpc_index++)
+			if(rpc_methods[rpc_index].method_hash == method_hash)
+				break;
+		if(rpc_index == rpc_methods.size())
+			return;
+
+		rpc_record &record = rpc_methods[rpc_index];
 		
-		theEvent->notify_posted(this);
-		
-		event_note *event = mEventNoteChunker.allocate();
-		event->_event = theEvent;
+		event_note *event = new event_note;
+		event->_rpc = the_functor;
 		event->_next_event = NULL;
+		event->rpc_index = rpc_index;
 		
-		if(event->_event->_guarantee_type == net_event::guaranteed_ordered)
+		if(record.guarantee_type == rpc_guaranteed_ordered)
 		{
 			event->_sequence_count = _next_send_event_sequence++;
 			if(!_send_event_queue_head)
@@ -540,7 +443,68 @@ public:
 				_unordered_send_event_queue_tail->_next_event = event;
 			_unordered_send_event_queue_tail = event;
 		}
-		return true;
 	}
+	
+	event_connection()
+	{
+		// event management data:
+		
+		_notify_event_list = NULL;
+		_send_event_queue_head = NULL;
+		_send_event_queue_tail = NULL;
+		_unordered_send_event_queue_head = NULL;
+		_unordered_send_event_queue_tail = NULL;
+		_wait_seq_events = NULL;
+		
+		_next_send_event_sequence = first_valid_send_event_sequence;
+		_next_receive_event_sequence = first_valid_send_event_sequence;
+		_last_acked_event_sequence = -1;
+		_rpc_count = 0;
+		_rpc_id_bit_size = 0;
+	}
+	
+	~event_connection()
+	{
+		while(_notify_event_list)
+		{
+			event_note *temp = _notify_event_list;
+			_notify_event_list = temp->_next_event;
+			delete temp;
+		}
+		while(_unordered_send_event_queue_head)
+		{
+			event_note *temp = _unordered_send_event_queue_head;
+			_unordered_send_event_queue_head = temp->_next_event;
+			delete temp;
+		}
+		while(_send_event_queue_head)
+		{
+			event_note *temp = _send_event_queue_head;
+			_send_event_queue_head = temp->_next_event;
+			delete temp;
+		}
+	}
+private:
+	enum 
+	{
+		debug_checksum = 0xF00DBAAD,
+		bit_stream_position_bit_size = 16,
+		InvalidSendEventSeq = -1,
+		first_valid_send_event_sequence = 0
+	};
+	event_note *_send_event_queue_head; ///< Head of the list of events to be sent to the remote host
+	event_note *_send_event_queue_tail; ///< Tail of the list of events to be sent to the remote host.  New events are tagged on to the end of this list
+	event_note *_unordered_send_event_queue_head; ///< Head of the list of events sent without ordering information
+	event_note *_unordered_send_event_queue_tail; ///< Tail of the list of events sent without ordering information
+	event_note *_wait_seq_events;   ///< List of ordered events on the receiving host that are waiting on previous sequenced events to arrive.
+	event_note *_notify_event_list; ///< Ordered list of events on the sending host that are waiting for receipt of processing on the client.
+	
+	int32 _next_send_event_sequence; ///< The next sequence number for an ordered event sent through this connection
+	int32 _next_receive_event_sequence; ///< The next receive event sequence to process
+	int32 _last_acked_event_sequence; ///< The last event the remote host is known to have processed
+	
+	uint32 _rpc_count; ///< Number of net_event classes supported by this connection
+	uint32 _rpc_id_bit_size; ///< Bit field width of net_event class count.
+	uint32 mEventClassVersion; ///< The highest version number of events on this connection.
 };
 

@@ -3,7 +3,7 @@ class net_connection;
 class net_interface : public ref_object
 {
 public:
-	net_interface(const SOCKADDR *bind_address)
+	net_interface(SOCKADDR *bind_address)
 	{
 		_socket = torque_socket_create(bind_address);		
 	}
@@ -34,16 +34,6 @@ public:
 		return torque_socket_does_allow_incoming_connections(_socket);
 	}
 	
-	void allow_arranged_connections(bool allow)
-	{
-		torque_socket_allow_arranged_connections(_socket, allow);
-	}
-	
-	bool does_allow_arranged_connections()
-	{
-		return torque_socket_does_allow_arranged_connections(_socket);
-	}
-	
 	void process_socket()
 	{
 		torque_socket_event *event;
@@ -52,38 +42,38 @@ public:
 			switch(event->event_type)
 			{
 					
-				case torque_socket_event::torque_connection_challenge_response_event_type:
-					_process_challenge_response((torque_connection_challenge_response_event *) event);
+				case torque_connection_challenge_response_event_type:
+					_process_challenge_response(event);
 					break;
-				case torque_socket_event::torque_connection_requested_event_type:
-					_process_connection_requested((torque_connection_requested_event *) event);
+				case torque_connection_requested_event_type:
+					_process_connection_requested(event);
 					break;
-				case torque_socket_event::torque_connection_arranged_connection_request_event_type:
-					_process_arranged_connection_request((torque_connection_arranged_connection_request_event *) event);
+				case torque_connection_arranged_connection_request_event_type:
+					_process_arranged_connection_request(event);
 					break;
-				case torque_socket_event::torque_connection_accepted_event_type:
-					_process_connection_accepted((torque_connection_accepted_event *) event);
+				case torque_connection_accepted_event_type:
+					_process_connection_accepted(event);
 					break;
-				case torque_socket_event::torque_connection_rejected_event_type:
-					_process_connection_rejected((torque_connection_rejected_event *) event);
+				case torque_connection_rejected_event_type:
+					_process_connection_rejected(event);
 					break;
-				case torque_socket_event::torque_connection_timed_out_event_type:
-					_process_connection_timed_out((torque_connection_timed_out_event *) event);
+				case torque_connection_timed_out_event_type:
+					_process_connection_timed_out(event);
 					break;
-				case torque_socket_event::torque_connection_disconnected_event_type:
-					_process_connection_disconnected((torque_connection_disconnected_event *) event);
+				case torque_connection_disconnected_event_type:
+					_process_connection_disconnected(event);
 					break;
-				case torque_socket_event::torque_connection_established_event_type:
-					_process_connection_established((torque_connection_established_event *) event);
+				case torque_connection_established_event_type:
+					_process_connection_established(event);
 					break;
-				case torque_socket_event::torque_connection_packet_event_type:
-					_process_connection_packet((torque_connection_packet_event *) event);
+				case torque_connection_packet_event_type:
+					_process_connection_packet(event);
 					break;
-				case torque_socket_event::torque_connection_packet_notify_event_type:
-					_process_connection_packet_notify((torque_connection_packet_notify_event *) event);
+				case torque_connection_packet_notify_event_type:
+					_process_connection_packet_notify(event);
 					break;
-				case torque_socket_event::torque_socket_packet_event_type:
-					_process_socket_packet((torque_socket_packet_event *) event);
+				case torque_socket_packet_event_type:
+					_process_socket_packet(event);
 					break;
 			}
 		}
@@ -151,9 +141,9 @@ public:
 		_connection_table.insert(the_torque_connection, the_net_connection);
 	}
 	
-	void _process_challenge_response(torque_connection_challenge_response_event *event)
+	void _process_challenge_response(torque_socket_event *event)
 	{
-		bit_stream challenge_response(event->challenge_response_data, event->challenge_response_data_size);
+		bit_stream challenge_response(event->data, event->data_size);
 		byte_buffer_ptr public_key = new byte_buffer(event->public_key, event->public_key_size);
 		
 		ref_ptr<net_connection> *the_connection = _connection_table.find(event->connection).value();
@@ -164,10 +154,10 @@ public:
 		}
 	}
 		
-	void _process_connection_requested(torque_connection_requested_event *event)
+	void _process_connection_requested(torque_socket_event *event)
 	{
 		bit_stream key_stream(event->public_key, event->public_key_size);
-		bit_stream request_stream(event->connection_request_data, event->connection_request_data_size);
+		bit_stream request_stream(event->data, event->data_size);
 		uint8 response_buffer[torque_max_status_datagram_size];
 		bit_stream response_stream(response_buffer, torque_max_status_datagram_size);
 		
@@ -190,21 +180,28 @@ public:
 			torque_connection_reject(event->connection, response_stream.get_next_byte_position(), response_stream.get_buffer());
 	}
 	
-	void _process_arranged_connection_request(torque_connection_arranged_connection_request_event *event)
+	void _process_arranged_connection_request(torque_socket_event *event)
 	{
 		
 	}
 
-	void _process_connection_accepted(torque_connection_accepted_event *event)
+	void _process_connection_accepted(torque_socket_event *event)
 	{
-		bit_stream connection_accept_stream(event->connection_accept_data, event->connection_accept_data_size);
-		
-		ref_ptr<net_connection> *the_connection = _connection_table.find(event->connection).value();
+		bit_stream connection_accept_stream(event->data, event->data_size);
+		packet_stream response_stream;
+
+		connection_pointer p = _connection_table.find(event->connection);
+
+		ref_ptr<net_connection> *the_connection = p.value();
 		if(the_connection)
 		{
 			(*the_connection)->set_connection_state(net_connection::state_accepted);
-			(*the_connection)->on_connection_accepted(connection_accept_stream);
-			if((*the_connection)->get_connection_state() == net_connection::state_accepted)
+			if(!(*the_connection)->read_connect_accept(connection_accept_stream, response_stream))
+			{
+				torque_connection_disconnect(event->connection, response_stream.get_next_byte_position(), response_stream.get_buffer());
+				p.remove();
+			}
+			else
 			{
 				(*the_connection)->set_connection_state(net_connection::state_established);
 				(*the_connection)->on_connection_established();
@@ -212,9 +209,9 @@ public:
 		}
 	}
 	
-	void _process_connection_rejected(torque_connection_rejected_event *event)
+	void _process_connection_rejected(torque_socket_event *event)
 	{
-		bit_stream connection_rejected_stream(event->connection_reject_data, event->connection_reject_data_size);
+		bit_stream connection_rejected_stream(event->data, event->data_size);
 		connection_pointer p = _connection_table.find(event->connection);
 		
 		ref_ptr<net_connection> *the_connection = p.value();
@@ -226,7 +223,7 @@ public:
 		}
 	}
 	
-	void _process_connection_timed_out(torque_connection_timed_out_event *event)
+	void _process_connection_timed_out(torque_socket_event *event)
 	{
 		connection_pointer p = _connection_table.find(event->connection);
 		
@@ -239,9 +236,9 @@ public:
 		}
 	}
 	
-	void _process_connection_disconnected(torque_connection_disconnected_event *event)
+	void _process_connection_disconnected(torque_socket_event *event)
 	{
-		bit_stream connection_disconnected_stream(event->connection_disconnected_data, event->connection_disconnected_data_size);
+		bit_stream connection_disconnected_stream(event->data, event->data_size);
 		connection_pointer p = _connection_table.find(event->connection);
 		
 		ref_ptr<net_connection> *the_connection = p.value();
@@ -253,7 +250,7 @@ public:
 		}
 	}
 	
-	void _process_connection_established(torque_connection_established_event *event)
+	void _process_connection_established(torque_socket_event *event)
 	{
 		ref_ptr<net_connection> *the_connection = _connection_table.find(event->connection).value();
 		if(the_connection)
@@ -263,7 +260,7 @@ public:
 		}
 	}
 	
-	void _process_connection_packet(torque_connection_packet_event *event)
+	void _process_connection_packet(torque_socket_event *event)
 	{
 		ref_ptr<net_connection> *the_connection = _connection_table.find(event->connection).value();
 		if(the_connection)
@@ -273,14 +270,14 @@ public:
 		}
 	}
 	
-	void _process_connection_packet_notify(torque_connection_packet_notify_event *event)
+	void _process_connection_packet_notify(torque_socket_event *event)
 	{
 		ref_ptr<net_connection> *the_connection = _connection_table.find(event->connection).value();
 		if(the_connection)
-			(*the_connection)->on_packet_notify(event->send_sequence, event->delivered);
+			(*the_connection)->on_packet_notify(event->packet_sequence, event->delivered);
 	}
 	
-	void _process_socket_packet(torque_socket_packet_event *event)
+	void _process_socket_packet(torque_socket_event *event)
 	{
 		
 	}

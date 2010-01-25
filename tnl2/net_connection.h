@@ -66,7 +66,12 @@ public:
 	{
 	}
 	
-	virtual void on_connection_accepted(bit_stream &accept_stream)
+	virtual void write_connect_accept(bit_stream &accept_stream)
+	{
+		
+	}
+		
+	virtual bool read_connect_accept(bit_stream &accept_stream, bit_stream &response_stream)
 	{
 	}
 	
@@ -117,6 +122,11 @@ public:
 			packet_dropped(note);
 		}
 		delete note;
+	}
+	
+	torque_connection get_torque_connection()
+	{
+		return _connection;
 	}
 	
 	void set_torque_connection(torque_connection connection)
@@ -304,6 +314,14 @@ public:
 			on_packet_notify(0, false);
 	}
 	
+	bool is_connection_host()
+	{
+	}
+	
+	bool is_connection_initiator()
+	{
+	}
+	
 	net_connection()
 	{
 		_round_trip_time = 0;
@@ -331,6 +349,9 @@ protected:
 		default_fixed_send_period = 96, ///< The default delay between each packet send - approx 10 packets per second.
 		max_fixed_bandwidth = 65535, ///< The maximum bandwidth for a connection using the fixed rate transmission method.
 		max_fixed_send_period = 2047, ///< The maximum period between packets in the fixed rate send transmission method.
+	};
+	enum {
+		minimum_padding_bits = 32, ///< ask subclasses to reserve at least this much.
 	};
 	
 	net_rate _local_rate; ///< Current communications rate negotiated for this connection.
