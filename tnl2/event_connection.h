@@ -18,20 +18,6 @@ enum rpc_guarantee_type {
 	rpc_unguaranteed = 2 ///< Event delivery is not guaranteed - however, the event will remain ordered relative to other unguaranteed events.
 };
 
-uint32 hash_buffer(const void *buffer, uint32 len)
-{
-	uint8 *buf = (uint8 *) buffer;
-	uint32 result = 0;
-	while(len--)
-		result = ((result << 8) | (result >> 24)) ^ uint32(*buf++);
-	return result;
-}
-
-template <typename signature> uint32 hash_method(signature the_method)
-{
-	return hash_buffer((void *) &the_method, sizeof(the_method));
-}
-
 class event_connection : public net_connection
 {
 public:
@@ -88,6 +74,12 @@ public:
 		the_record.direction = direction;
 		the_record.method_hash = hash_method(the_method);
 		rpc_methods.push_back(the_record);
+	}
+	template <class T> void rpc(void (T::*method)())
+	{
+		uint32 method_hash = hash_method(method);
+		functor_decl<void (T::*)()> *f = new functor_decl<void (T::*)()>(method);
+		call_rpc(method_hash, f);
 	}
 	template <class T, class A> void rpc(void (T::*method)(A), A arg1)
 	{
@@ -315,7 +307,7 @@ public:
 				previous_sequence = seq;
 			}
 			
-			int32 start = bstream.get_bit_position();
+			//int32 start = bstream.get_bit_position();
 			uint32 rpc_index = bstream.read_integer(_rpc_id_bit_size);
 			if(rpc_index >= _rpc_count)
 				throw tnl_exception_invalid_packet;

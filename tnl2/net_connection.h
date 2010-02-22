@@ -73,6 +73,7 @@ public:
 		
 	virtual bool read_connect_accept(bit_stream &accept_stream, bit_stream &response_stream)
 	{
+		return true;
 	}
 	
 	virtual void on_connection_rejected(bit_stream &reject_stream)

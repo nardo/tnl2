@@ -1,18 +1,19 @@
 
 class net_connection;
+class net_object;
+
 class net_interface : public ref_object
 {
+	friend class net_object;
+	
+	typedef hash_table_array<torque_connection, ref_ptr<net_connection> >::pointer connection_pointer;
+	struct connection_type_record
+	{
+		uint32 identifier;
+		type_record *type;
+	};
+	
 public:
-	net_interface(SOCKADDR *bind_address)
-	{
-		_socket = torque_socket_create(bind_address);		
-	}
-	
-	virtual ~net_interface()
-	{
-		torque_socket_destroy(_socket);
-	}
-	
 	void set_private_key(asymmetric_key_ptr the_key)
 	{
 		byte_buffer_ptr private_key = the_key->get_private_key();
@@ -78,17 +79,6 @@ public:
 			}
 		}
 	}
-
-	hash_table_array<torque_connection, ref_ptr<net_connection> > _connection_table;
-	typedef hash_table_array<torque_connection, ref_ptr<net_connection> >::pointer connection_pointer;
-	struct connection_type_record
-	{
-		uint32 identifier;
-		type_record *type;
-	};
-	
-	array<connection_type_record> _connection_class_table;
-
 	template<class connection_type> void add_connection_type(uint32 identifier)
 	{
 		type_record *the_type_record = get_global_type_record<connection_type>();
@@ -123,7 +113,44 @@ public:
 		return 0;
 	}
 	
-	time _process_start_time;
+	void collapse_dirty_list()
+	{
+		for(net_object *obj = _dirty_list_head._next_dirty_list; obj != &_dirty_list_tail; )
+		{
+			net_object *next = obj->_next_dirty_list;
+			uint32 or_mask = obj->_dirty_mask_bits;
+			
+			obj->_next_dirty_list = NULL;
+			obj->_prev_dirty_list = NULL;
+			obj->_dirty_mask_bits = 0;
+			
+			if(or_mask)
+			{
+				for(ghost_info *walk = obj->_first_object_ref; walk; walk = walk->next_object_ref)
+				{
+					if(!walk->update_mask)
+					{
+						walk->update_mask = or_mask;
+						walk->connection->ghost_push_non_zero(walk);
+					}
+					else
+						walk->update_mask |= or_mask;
+				}
+			}
+			obj = next;
+		}
+		_dirty_list_head._next_dirty_list = &_dirty_list_tail;
+		_dirty_list_tail._prev_dirty_list = &_dirty_list_head;
+	}
+	void add_to_dirty_list(net_object *obj)
+	{
+		assert(obj->_next_dirty_list == 0);
+		assert(obj->_prev_dirty_list == 0);
+		obj->_next_dirty_list = _dirty_list_head._next_dirty_list;
+		obj->_next_dirty_list->_prev_dirty_list = obj;
+		_dirty_list_head._next_dirty_list = obj;
+		obj->_prev_dirty_list = &_dirty_list_head;
+	}
 	
 	time get_process_start_time()
 	{
@@ -293,6 +320,27 @@ public:
 
 		torque_socket_connect(_socket, connect_address, connect_stream.get_next_byte_position(), connect_buffer);
 	}
-	torque_socket _socket;
+
+	virtual ~net_interface()
+	{
+		torque_socket_destroy(_socket);
+	}
+
+	net_interface(SOCKADDR *bind_address)
+	{
+		_socket = torque_socket_create(bind_address);
+		
+		_dirty_list_head._next_dirty_list = &_dirty_list_tail;
+		_dirty_list_tail._prev_dirty_list = &_dirty_list_head;
+		_dirty_list_head._prev_dirty_list = 0;
+		_dirty_list_tail._next_dirty_list = 0;
+	}
+private:
+	torque_socket _socket;	
+	time _process_start_time;	
+	net_object _dirty_list_head;
+	net_object _dirty_list_tail;	
+	array<connection_type_record> _connection_class_table;
+	hash_table_array<torque_connection, ref_ptr<net_connection> > _connection_table;
 };
 
