@@ -304,7 +304,7 @@ public:
 			(*the_connection)->on_packet_notify(event->packet_sequence, event->delivered);
 	}
 	
-	void _process_socket_packet(torque_socket_event *event)
+	virtual void _process_socket_packet(torque_socket_event *event)
 	{
 		
 	}
@@ -326,16 +326,16 @@ public:
 		torque_socket_destroy(_socket);
 	}
 
-	net_interface(SOCKADDR *bind_address)
+	net_interface(SOCKADDR &bind_address)
 	{
-		_socket = torque_socket_create(bind_address);
+		_socket = torque_socket_create(&bind_address);
 		
 		_dirty_list_head._next_dirty_list = &_dirty_list_tail;
 		_dirty_list_tail._prev_dirty_list = &_dirty_list_head;
 		_dirty_list_head._prev_dirty_list = 0;
 		_dirty_list_tail._next_dirty_list = 0;
 	}
-private:
+protected:
 	torque_socket _socket;	
 	time _process_start_time;	
 	net_object _dirty_list_head;

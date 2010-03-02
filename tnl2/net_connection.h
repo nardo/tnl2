@@ -328,6 +328,7 @@ public:
 		_round_trip_time = 0;
 		_send_delay_credit = time(0);
 		_last_update_time = time(0);
+		_notify_queue_head = _notify_queue_tail = 0;
 		_local_rate.max_recv_bandwidth = default_fixed_bandwidth;
 		_local_rate.max_send_bandwidth = default_fixed_bandwidth;
 		_local_rate.min_packet_recv_period = default_fixed_send_period;
@@ -339,6 +340,10 @@ public:
 		_last_send_sequence = 0;
 	}
 	
+	net_interface *get_interface()
+	{
+		return _interface;
+	}
 	virtual ~net_connection()
 	{
 		_clear_all_packet_notifies();

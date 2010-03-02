@@ -195,6 +195,11 @@ public:
 		_dirty_mask_bits |= or_mask;
 	}
 	
+	void set_dirty_state(uint32 state_index)
+	{
+		set_mask_bits(1 << state_index);
+	}
+	
 	/// Called to determine the relative update priority of an ref_object.
 	///
 	/// All objects that are in scope and that have out of date states are queried and sorted by priority before being updated.  If there is not enough room in a single packet for all out of date objects, the skipped objects will have an incremented update_skips the next time that connection prepares to send a packet. Typically the update priority is scaled by update_skips so that as data becomes stale, it becomes more of a priority to  update.
