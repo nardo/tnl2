@@ -19,7 +19,8 @@ public:
 		//TNL::AsymmetricKey *theKey = new TNL::AsymmetricKey(32);
 		//_net_interface->setPrivateKey(theKey);
 		//_net_interface->setRequiresKeyExchange(true);
-		
+		random_generator g;
+
 		_last_time = time::get_current();
 		
 		if(_is_server)
@@ -27,7 +28,7 @@ public:
 			// generate some _buildings and AIs:
 			for(int32 i = 0; i < 50; i ++)
 			{
-				building *the_building = new building;
+				building *the_building = new building(&g);
 				the_building->add_to_game(this);
 			}
 			for(int32 i = 0; i < 15; i ++)
@@ -70,10 +71,15 @@ public:
 	
 	/// renderFrame is called by the platform windowing code to notify the game
 	/// that it should render the current world using the specified window area.
-	void renderFrame()
+	void render_frame()
 	{
 		glClearColor(1, 1, 0, 0);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(0, 1, 1, 0, 0, 1);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
 		// first, render the alpha blended circle around the player,
 		// to show the scoping range.
 		
