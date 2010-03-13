@@ -7,8 +7,8 @@
 // Copyright GarageGames.  See /license/info.txt in this distribution for licensing terms.
 
 #include "tomcrypt.h"
-#include "platform/platform.h"
-#include "torque_socket_event.h"
+#include "core/platform.h"
+#include "torque_sockets/torque_socket_event.h"
 
 namespace core
 {
@@ -41,7 +41,7 @@ namespace core
 		return hash_buffer((void *) &the_method, sizeof(the_method));
 	}
 	struct net {
-		#include "net/net.h"
+		#include "torque_sockets/torque_sockets.h"
 	};
 };
 
