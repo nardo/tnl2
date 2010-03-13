@@ -76,7 +76,9 @@ HEADERS += tnl2_test_widget.h \
     ../tnl2/ghost_connection.h \
     ../tnl2/exceptions.h \
     ../tnl2/event_connection.h \
-    window.h
+    window.h \
+    ../../torque_sockets/platform_library/net/torque_socket.h \
+    ../../torque_sockets/platform_library/net/torque_connection.h
 FORMS += 
 INCLUDEPATH += ../tnl2 \
     ../../torque_sockets/platform_library \
