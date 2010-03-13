@@ -6,7 +6,7 @@ public:
 	/// Constants used in this net_interface
 	enum Constants {
 		PingDelayTime = 2000, ///< Milliseconds to wait between sending GamePingRequest packets.
-		GamePingRequest = interface::first_valid_info_packet_id, ///< Byte value of the first byte of a GamePingRequest packet.
+		GamePingRequest = torque_socket::first_valid_info_packet_id, ///< Byte value of the first byte of a GamePingRequest packet.
 		GamePingResponse, ///< Byte value of the first byte of a GamePingResponse packet.
 	};
 	
@@ -28,6 +28,10 @@ public:
 		_ping_address = ping_addr;
 	}
 	
+	test_game *get_game()
+	{
+		return _game;
+	}
 	
 	/// handle_info_packet overrides the method in the net_interface class to handle processing of the GamePingRequest and GamePingResponse packet types.
 	void _process_socket_packet(torque_socket_event *event)
@@ -36,13 +40,14 @@ public:
 		uint8 packet_type = event->data[0];
 		address from(event->source_address);
 		string from_string = from.to_string();
-		
+		logprintf("%s - received socket packet, packet_type == %d.", from_string.c_str(), packet_type);
 		if(packet_type == GamePingRequest && _is_server)
 		{
 			logprintf("%s - received ping.", from_string.c_str());
 			// we're a server, and we got a ping packet from a client, so send back a GamePingResponse to let the client know it has found a server.
 			core::write(write_stream, uint8(GamePingResponse));
-			torque_socket_send_to(_socket, &event->source_address, write_stream.get_next_byte_position(), write_stream.get_buffer());
+			_socket.send_to(from, write_stream);
+			//torque_socket_send_to(_socket, &event->source_address, write_stream.get_next_byte_position(), write_stream.get_buffer());
 			
 			logprintf("%s - sending ping response.", from_string.c_str());
 		}
@@ -52,8 +57,9 @@ public:
 			
 			logprintf("%s - received ping response.", from_string.c_str());
 			
-			ref_ptr<net_connection> the_connection = new test_connection;
-			connect(&event->source_address, the_connection); 
+			ref_ptr<net_connection> the_connection = new test_connection(true);
+			address from(event->source_address);
+			connect(from, the_connection); 
 			logprintf("Connecting to server: %s", from_string.c_str());
 			
 			_pinging_servers = false;
@@ -66,7 +72,9 @@ public:
 		packet_stream write_stream;
 		
 		core::write(write_stream, uint8(GamePingRequest));
-		torque_socket_send_to(_socket, &_ping_address, write_stream.get_next_byte_position(), write_stream.get_buffer());
+		address ping_addr(_ping_address);
+		_socket.send_to(ping_addr, write_stream);
+		//torque_socket_send_to(_socket, &_ping_address, write_stream.get_next_byte_position(), write_stream.get_buffer());
 
 		string ping_address_string = address(_ping_address).to_string();
 		logprintf("%s - sending ping.", ping_address_string.c_str());

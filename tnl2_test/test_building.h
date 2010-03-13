@@ -7,6 +7,8 @@ class building : public net_object
 {
 	typedef net_object parent;
 public:
+	declare_dynamic_class()
+
 	/// Mask bits used to determine what states are out of date for this
 	/// object and what then represent.
 	enum {

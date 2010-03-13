@@ -8,7 +8,7 @@
 
 #include "tomcrypt.h"
 #include "platform/platform.h"
-#include "torque_sockets_ref.h"
+#include "torque_socket_event.h"
 
 namespace core
 {
@@ -22,6 +22,8 @@ namespace core
 			result = ((result << 8) | (result >> 24)) ^ uint32(*buf++);
 		return result;
 	}
+	int _log_index = 0;
+
 	void logprintf(const char *format, ...)
 	{
 		char buffer[4096];
@@ -29,8 +31,9 @@ namespace core
 		va_list s;
 		va_start( s, format );
 		int32 len = vsnprintf(buffer + bufferStart, sizeof(buffer) - bufferStart, format, s);
-		printf("LOG: %s\n", buffer);
+		printf("LOG %d: %s\n", _log_index, buffer);
 		va_end(s);
+		fflush(stdout);
 	}
 		
 	template <typename signature> uint32 hash_method(signature the_method)
@@ -42,14 +45,14 @@ namespace core
 	};
 };
 
-#include "torque_sockets_implementation.h"
+//#include "torque_sockets_implementation.h"
 
 namespace core
 {
 	struct tnl : net {	
 		#include "tnl2.h"
 	};
-	
+
 	struct tnl_test : tnl
 	{
 		struct position {
@@ -62,35 +65,65 @@ namespace core
 		#include "test_net_interface.h"
 	};
 
-	tnl_test::test_game *server_game = 0;
-	tnl_test::test_game *client_game = 0;
+	tnl_test::test_game *game[2] = { 0, 0 };
 };
 
 using namespace core;
 
-void init_game()
+void restart_games(bool game_1_is_server, bool game_2_is_server)
 {
-	SOCKADDR interface_bind_address, ping_address;
+	ltc_mp = ltm_desc;
+	if(game[0])
+		delete game[0];
+	if(game[1])
+		delete game[1];
+
+	SOCKADDR interface_bind_address1, interface_bind_address2, ping_address;
 	net::address a;
-	a.to_sockaddr(&interface_bind_address);
+	a.set_port(28000);
 	a.to_sockaddr(&ping_address);
-	client_game = new tnl_test::test_game(true, interface_bind_address, ping_address);
+	if(game_1_is_server)
+		a.to_sockaddr(&interface_bind_address1);
+	else
+	{
+		a.set_port(0);
+		a.to_sockaddr(&interface_bind_address1);
+	}
+	a.set_port(28001);
+	if(game_2_is_server)
+		a.to_sockaddr(&interface_bind_address2);
+	{
+		a.set_port(0);
+		a.to_sockaddr(&interface_bind_address2);
+	}
+	game[0] = new tnl_test::test_game(game_1_is_server, interface_bind_address1, ping_address);
+	game[1] = new tnl_test::test_game(game_2_is_server, interface_bind_address2, ping_address);
 }
 
-void click_game(float x, float y)
+void click_game(int game_index, float x, float y)
 {
-
+	tnl_test::position p;
+	p.x = x;
+	p.y = y;
+	if(game[game_index])
+		game[game_index]->move_my_player_to(p);
 }
 
-void tick_game()
+void tick_games()
 {
-	client_game->tick();
+	core::_log_index = 0;
+	if(game[0])
+		game[0]->tick();
+	core::_log_index = 1;
+	if(game[1])
+		game[1]->tick();
 }
 
 /// renderFrame is called by the platform windowing code to notify the game
 /// that it should render the current world using the specified window area.
-void render_game_scene()
+void render_game_scene(int game_index)
 {
-	client_game->render_frame();
+	if(game[game_index])
+		game[game_index]->render_frame();
 }
 

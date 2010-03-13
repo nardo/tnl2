@@ -4,6 +4,8 @@ class player : public net_object
 {
 	typedef net_object parent;
 public:
+	declare_dynamic_class()
+
 	position _start_pos, _end_pos; ///< All players move along a line from _start_pos to _end_pos.
 	position _render_pos; ///< position at which to render the player - computed during update().
 	float32 _t; ///< Parameter of how far the player is along the line from _start_pos to _end_pos.

@@ -7,11 +7,12 @@ class tnl2_test_widget : public QGLWidget
 {
 Q_OBJECT
 public:
-    explicit tnl2_test_widget(QWidget *parent = 0);
+	explicit tnl2_test_widget(QWidget *parent = 0, int pane = 0);
 protected:
     QPoint lastPos;
     QColor qtGreen;
     QColor qtPurple;
+	int _pane;
     void initializeGL();
     void paintGL();
     void resizeGL(int width, int height);
@@ -21,8 +22,6 @@ protected:
 signals:
 
 public slots:
-	void tick();
-
 };
 
 #endif // TNL2_TEST_WIDGET_H

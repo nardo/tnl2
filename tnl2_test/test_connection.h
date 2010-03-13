@@ -6,16 +6,11 @@
 class test_connection : public ghost_connection
 {
 	typedef ghost_connection parent;
-	bool _is_initiator;
 public:
-	test_connection(bool is_initiator = false)
+	declare_dynamic_class()
+
+	test_connection(bool is_initiator = false) : parent(is_initiator)
 	{
-		_is_initiator = is_initiator;
-	}
-	
-	bool is_initiator()
-	{
-		return _is_initiator;
 	}
 	
 	/// The player object associated with this connection.
@@ -39,7 +34,7 @@ public:
 	
 	void on_connection_terminated(bit_stream *the_stream)
 	{
-		if(is_initiator())
+		if(is_connection_initiator())
 			((test_net_interface *) get_interface())->_pinging_servers = true;
 		else
 			delete (player*) _player;
@@ -58,7 +53,8 @@ public:
 		// To see how this program performs with 50% packet loss, Try uncommenting the next line :)
 		//setSimulatedNetParams(0.5, 0);
 		
-		if(is_initiator())
+		set_type_database(((test_net_interface *) get_interface())->get_game()->get_type_database());
+		if(is_connection_initiator())
 		{
 			set_ghost_from(false);
 			set_ghost_to(true);

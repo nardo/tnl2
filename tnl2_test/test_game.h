@@ -10,16 +10,31 @@ public:
 	safe_ptr<player> _server_player; ///< the player that the server controls
 	safe_ptr<player> _client_player; ///< the player that this client controls, if this game is a client
 	random_generator _random;
+	context _context;
+	type_database _type_database;
 	
+	enum {
+		test_connection_identifier_token = 0xBEEF,
+	};
 	/// Constructor for test_game, determines whether this game will be a client or a server, and what addresses to bind to and ping.  If this game is a server, it will construct 50 random _buildings and 15 random AI _players to populate the "world" with.  test_game also constructs an AsymmetricKey to demonstrate establishing secure connections with clients and servers.
-	test_game(bool server, SOCKADDR &interface_bind_address, SOCKADDR &ping_address)
+	test_game(bool server, SOCKADDR &interface_bind_address, SOCKADDR &ping_address) : _type_database(&_context)
 	{
 		_is_server = server;
 		_net_interface = new test_net_interface(this, _is_server, interface_bind_address, ping_address);
+		_net_interface->add_connection_type<test_connection>(test_connection_identifier_token);
+
 		//TNL::AsymmetricKey *theKey = new TNL::AsymmetricKey(32);
 		//_net_interface->setPrivateKey(theKey);
 		//_net_interface->setRequiresKeyExchange(true);
 		random_generator g;
+		
+		tnl_begin_class(_type_database, position, empty_type, false)
+		tnl_slot(_type_database, position, x, 0)
+		tnl_slot(_type_database, position, y, 0)
+		tnl_end_class(_type_database)
+		
+		player::register_class(_type_database);
+		building::register_class(_type_database);
 
 		_last_time = time::get_current();
 		
@@ -53,6 +68,11 @@ public:
 			delete _players[i];
 		
 		logprintf("Destroyed a %s...", (this->_is_server ? "server" : "client"));
+	}
+	
+	type_database *get_type_database()
+	{
+		return &_type_database;
 	}
 		
 	/// Called periodically by the platform windowing code, tick will update all the _players in the simulation as well as tick() the game's network interface.
