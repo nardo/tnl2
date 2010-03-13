@@ -11,18 +11,14 @@ class ghost_connection : public event_connection
 public:
 	/// ghost_ref tracks an update sent in one packet for the ghost of one net_object.
 	///
-	/// When we are notified that a pack is sent/lost, this is used to determine what
-	/// updates need to be resent and so forth.
+	/// When we are notified that a pack is sent/lost, this is used to determine what updates need to be resent and so forth.
 	struct ghost_ref
 	{
-		uint32 mask;              ///< The mask of bits that were updated in this packet
-		uint32 ghost_info_flags;    ///< ghost_info::Flags bitset, determes if the ghost is in a
-		///  special processing mode (created/deleted)
-		ghost_info *ghost;      ///< The ghost information for the object on the connection that sent
-		///  the packet this ghost_ref is attached to
-		ghost_ref *next_ref;     ///< The next ghost updated in this packet
-		ghost_ref *update_chain; ///< A pointer to the ghost_ref on the least previous packet that
-		///  updated this ghost, or NULL, if no prior packet updated this ghost
+		uint32 mask; ///< The mask of bits that were updated in this packet
+		uint32 ghost_info_flags; ///< ghost_info::Flags bitset, determes if the ghost is in a special processing mode (created/deleted)
+		ghost_info *ghost; ///< The ghost information for the object on the connection that sent the packet this ghost_ref is attached to
+		ghost_ref *next_ref; ///< The next ghost updated in this packet
+		ghost_ref *update_chain; ///< A pointer to the ghost_ref on the least previous packet that updated this ghost, or NULL, if no prior packet updated this ghost
 	};
 	
 	/// Notify structure attached to each packet with information about the ghost updates in the packet
@@ -428,6 +424,7 @@ protected:
 					
 					if(!obj->on_ghost_add(this))
 						throw tnl_exception_ghost_add_failed;
+					obj->on_ghost_update(0xFFFFFFFF);
 				}
 				else
 				{
@@ -437,6 +434,7 @@ protected:
 
 					uint32 update_mask = bstream.read_integer(type_rep->max_state_index);
 					read_object_update(bstream, object_pointer, type_rep, update_mask);
+					_local_ghosts[index]->on_ghost_update(update_mask);
 				}
 				TorqueLogMessageFormatted(LogGhostConnection, ("ghost_connection %s read GHOST %d", ttr->name.c_str(), bstream.get_bit_position() - start_position));
 			}

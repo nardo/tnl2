@@ -48,7 +48,7 @@ public:
 			}
 			for(int32 i = 0; i < 15; i ++)
 			{
-				player *ai_player = new player(player::player_type_ai);
+				player *ai_player = new player(player::player_type_ai, &g);
 				ai_player->add_to_game(this);
 			}
 			_server_player = new player(player::player_type_my_client);
@@ -84,7 +84,7 @@ public:
 		
 		float32 time_delta = (current_time - _last_time).get_milliseconds() / 1000.0f;
 		for(int32 i = 0; i < _players.size(); i++)  
-			_players[i]->update(time_delta, _random);
+			_players[i]->update(time_delta, &_random);
 		_net_interface->tick();
 		_last_time = current_time;
 	}
@@ -178,7 +178,8 @@ public:
 		}
 		else if(!_net_interface->_connection_to_server.is_null())
 		{
-			logprintf("posting new position (%g, %g) to server", new_position.x, new_position.y);
+			((test_connection *) _net_interface->_connection_to_server)->rpc(&test_connection::rpc_move_my_player_to, new_position.x, new_position.y);
+			logprintf("posting new position (%g, %g) to server", float32(new_position.x), float32(new_position.y));
 			//if(!_client_player.is_null())
 			//	_client_player->rpcPlayerWillMove("Whee! Foo!");
 			//_net_interface->connection_to_server->rpcSetPlayerPos(new_position.x, new_position.y);

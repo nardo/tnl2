@@ -310,16 +310,16 @@ public:
 			//int32 start = bstream.get_bit_position();
 			uint32 rpc_index = bstream.read_integer(_rpc_id_bit_size);
 			if(rpc_index >= _rpc_count)
-				throw tnl_exception_invalid_packet;
+				assert(0); //throw tnl_exception_invalid_packet;
 			
 			rpc_record &the_rpc = rpc_methods[rpc_index];
 			
 			functor *func = the_rpc.creator->create();
 			
 			// check if the direction this event moves is a valid direction.
-			if(   (the_rpc.direction == rpc_initiator_to_host && is_connection_host())
-			   || (the_rpc.direction == rpc_host_to_initiator && is_connection_initiator()) )
-				throw tnl_exception_invalid_packet;
+			if(   (the_rpc.direction == rpc_initiator_to_host && is_connection_initiator())
+			   || (the_rpc.direction == rpc_host_to_initiator && is_connection_host()) )
+				assert(0); //throw tnl_exception_invalid_packet;
 			func->read(bstream);
 			
 			if(unguaranteed_phase)

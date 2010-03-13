@@ -9,8 +9,34 @@ class test_connection : public ghost_connection
 public:
 	declare_dynamic_class()
 
+	void rpc_set_control_object(enumeration<ghost_connection::max_ghost_count> player_id)
+	{
+		logprintf("My player = %d", uint32(player_id));
+		net_object *the_object = resolve_ghost(player_id);
+		if(the_object)
+		{
+			player *the_player = dynamic_cast<player *>(the_object);
+			if(the_player)
+				((test_net_interface *) get_interface())->get_game()->_client_player = the_player;
+		}
+	}
+
+	void rpc_move_my_player_to(unit_float<12> x, unit_float<12> y)
+	{
+		position new_position;
+		new_position.x = x;
+		new_position.y = y;
+
+		logprintf("received new position (%g, %g) from client",
+					   float32(new_position.x), float32(new_position.y));
+		_player->server_set_position(_player->_render_pos, new_position, 0, 0.2f);
+	};
+
+
 	test_connection(bool is_initiator = false) : parent(is_initiator)
 	{
+		register_rpc(&test_connection::rpc_set_control_object, rpc_guaranteed_ordered, rpc_host_to_initiator);
+		register_rpc(&test_connection::rpc_move_my_player_to, rpc_guaranteed_ordered, rpc_initiator_to_host);
 	}
 	
 	/// The player object associated with this connection.

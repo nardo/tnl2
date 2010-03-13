@@ -24,12 +24,15 @@ public:
 		// place the "building" in a random position on the screen
 		if(random_gen)
 		{
-			
-		upper_left.x = random_gen->random_unit_float();
-		upper_left.y = random_gen->random_unit_float();
-		
-		lower_right.x = upper_left.x + random_gen->random_unit_float() * 0.1f + 0.025f;
-		lower_right.y = upper_left.y + random_gen->random_unit_float() * 0.1f + 0.025f;
+			upper_left.x = random_gen->random_unit_float();
+			upper_left.y = random_gen->random_unit_float();
+
+			lower_right.x = upper_left.x + random_gen->random_unit_float() * 0.1f + 0.025f;
+			lower_right.y = upper_left.y + random_gen->random_unit_float() * 0.1f + 0.025f;
+			if(lower_right.x > 1)
+				lower_right.x = 1;
+			if(lower_right.y > 1)
+				lower_right.y = 1;
 		}
 		else
 		{

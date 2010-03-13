@@ -56,7 +56,7 @@ namespace core
 	struct tnl_test : tnl
 	{
 		struct position {
-			float x, y;
+			unit_float<12> x, y;
 		};
 		#include "test_player.h"
 		#include "test_building.h"

@@ -187,12 +187,17 @@ public:
 	/// @note This is a server side call. It has no meaning for ghosts.
 	void set_mask_bits(uint32 or_mask)
 	{
+		if(is_ghost())
+			return;
 		assert(or_mask != 0);
 		//Assert(_dirty_mask_bits == 0 || (_prev_dirty_list != NULL || _next_dirty_list != NULL || _dirty_list == this), "Invalid dirty list state.");
-		if(!_dirty_mask_bits && _interface)
-			_interface->add_to_dirty_list(this);
+		if(_interface)
+		{
+			if(!_dirty_mask_bits)
+				_interface->add_to_dirty_list(this);
 
-		_dirty_mask_bits |= or_mask;
+			_dirty_mask_bits |= or_mask;
+		}
 	}
 	
 	void set_dirty_state(uint32 state_index)
@@ -217,6 +222,12 @@ public:
 	{
 	}
 	
+	/// on_ghost_update is called on the ghost when a portion of its states have been updated from the host.  For the initial update this will be called after on_ghost_add
+	virtual void on_ghost_update(uint32 mask_bits)
+	{
+
+	}
+
 	/// get_net_index returns the index tag used to identify the server copy
 	/// of a client ref_object.
 	uint32 get_net_index() { return _remote_index; }

@@ -23,7 +23,7 @@ public:
 	player_type _player_type; ///< What type of player is this?
 	
 	/// player constructor, assigns a random position in the playing field to the player, and if it is AI controlled will pick a first destination point.
-	player(player_type pt = player_type_client, random_generator *random_gen = 0)
+	player(player_type pt = player_type_ai_dummy, random_generator *random_gen = 0)
 	{
 		// assign a random starting position for the player.
 		if(random_gen)
@@ -116,11 +116,16 @@ public:
 		// // call a quick RPC to all the connections that have this object in scope
 		//rpcPlayerDidMove(end_pos.x, end_pos.y);
 	}
-	
+	void on_ghost_update(uint32 mask_bits)
+	{
+		logprintf("Got ghost update (%g, %g)->(%g, %g), %g, %g", float(_start_pos.x), float(_start_pos.y), float(_end_pos.x), float(_end_pos.y), _t, _t_delta);
+		update(0, 0);
+	}
+
 	/// Move this object along its path.
 	///
 	/// If it hits the end point, and it's an AI, it will generate a new destination.
-	void update(float32 time_delta, random_generator &random_gen)
+	void update(float32 time_delta, random_generator *random_gen)
 	{
 		_t += _t_delta * time_delta;
 		if(_t >= 1.0)
@@ -129,13 +134,13 @@ public:
 			_t_delta = 0;
 			_render_pos = _end_pos;
 			// if this is an AI player on the server, 
-			if(_player_type == player_type_ai)
+			if(_player_type == player_type_ai && random_gen)
 			{
 				_start_pos = _render_pos;
 				_t = 0;
-				_end_pos.x = random_gen.random_unit_float();  
-				_end_pos.y = random_gen.random_unit_float();
-				_t_delta = 0.2f + random_gen.random_unit_float() * 0.1f;
+				_end_pos.x = random_gen->random_unit_float();
+				_end_pos.y = random_gen->random_unit_float();
+				_t_delta = 0.2f + random_gen->random_unit_float() * 0.1f;
 				set_dirty_state(position_state); // notify the network system that the network state has been updated
 			}
 		}
@@ -146,6 +151,13 @@ public:
 	/// on_ghost_available is called on the server when it knows that this player has been constructed on the specified client as a result of being "in scope".  In TNLTest this method call is used to test the per-ghost targeted RPC functionality of NetObject subclasses by calling rpcPlayerIsInScope on the player ghost on the specified connection.
 	void on_ghost_available(ghost_connection *the_connection)
 	{
+		if(the_connection->get_scope_object() == this)
+		{
+			// once the scope object is successfully ghosted to the client, send and rpc with the ghost index to that connection, so it knows which player it controls.
+			//rpc(&ghost_connection::rpc_end_ghosting);
+			the_connection->rpc(&test_connection::rpc_set_control_object, enumeration<1024>(the_connection->get_ghost_index(this)));
+
+		}
 		// this function is called every time a ghost of this object is known to be available on a given client. we'll use this to demonstrate targeting a NetObject RPC to a specific connection.  Normally a RPC method marked as RPCToGhost will be broadcast to ALL ghosts of the object currently in scope.
 		
 		// first we construct an event that will represent the RPC call... the RPC macros create a RPCNAME_construct function that returns a NetEvent that encapsulates the RPC.
