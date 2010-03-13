@@ -6,7 +6,7 @@ class net_interface : public ref_object
 {
 	friend class net_object;
 	
-	typedef hash_table_array<torque_connection, ref_ptr<net_connection> >::pointer connection_pointer;
+	typedef hash_table_array<torque_connection_id, ref_ptr<net_connection> >::pointer connection_pointer;
 	struct connection_type_record
 	{
 		uint32 identifier;
@@ -16,30 +16,36 @@ class net_interface : public ref_object
 public:
 	void set_private_key(asymmetric_key_ptr the_key)
 	{
-		byte_buffer_ptr private_key = the_key->get_private_key();
-		torque_socket_set_private_key(_socket, private_key->get_buffer_size(), private_key->get_buffer());
+		_socket.set_private_key(the_key);
+		
+		//byte_buffer_ptr private_key = the_key->get_private_key();
+		//torque_socket_set_private_key(_socket, private_key->get_buffer_size(), private_key->get_buffer());
 	}
 	
-	void set_challenge_response_data(bit_stream &the_data)
+	void set_challenge_response_data(byte_buffer_ptr data)
 	{
-		torque_socket_set_challenge_response_data(_socket, the_data.get_next_byte_position(), the_data.get_buffer());
+		_socket.set_challenge_response_data(data);
+		//torque_socket_set_challenge_response_data(_socket, the_data.get_next_byte_position(), the_data.get_buffer());
 	}
 	
-	void allow_incoming_connections(bool allow)
+	void set_allows_connections(bool allow)
 	{
-		torque_socket_allow_incoming_connections(_socket, allow);
+		_socket.set_allows_connections(allow);
+		//torque_socket_allow_incoming_connections(_socket, allow);
 	}
 	
-	bool does_allow_incoming_connections()
+	bool does_allow_connections()
 	{
-		return torque_socket_does_allow_incoming_connections(_socket);
+		return _socket.does_allow_connections();
+		//return torque_socket_does_allow_incoming_connections(_socket);
 	}
 	
 	void process_socket()
 	{
 		torque_socket_event *event;
-		while((event = torque_socket_get_next_event(_socket)) != NULL)
+		while((event = _socket.get_next_event()) != NULL)
 		{
+			logprintf("Processing event of type %d, connection_index = %d, size = %d", event->event_type, event->connection, event->data_size);
 			switch(event->event_type)
 			{
 					
@@ -158,11 +164,17 @@ public:
 	}
 	void check_for_packet_sends()
 	{
+		_process_start_time = time::get_current();
+		collapse_dirty_list();
 		for(uint32 i = 0; i < _connection_table.size(); i++)
-			(*_connection_table[i].value())->check_packet_send(false, get_process_start_time());
+		{
+			net_connection *the_connection = *_connection_table[i].value();
+			if(the_connection->get_connection_state() == net_connection::state_established)
+				the_connection->check_packet_send(false, get_process_start_time());
+		}
 	}
 		
-	void _add_connection(ref_ptr<net_connection> &the_net_connection, torque_connection the_torque_connection)
+	void _add_connection(ref_ptr<net_connection> &the_net_connection, torque_connection_id the_torque_connection)
 	{
 		the_net_connection->set_torque_connection(the_torque_connection);
 		_connection_table.insert(the_torque_connection, the_net_connection);
@@ -172,8 +184,9 @@ public:
 	{
 		bit_stream challenge_response(event->data, event->data_size);
 		byte_buffer_ptr public_key = new byte_buffer(event->public_key, event->public_key_size);
-		
-		ref_ptr<net_connection> *the_connection = _connection_table.find(event->connection).value();
+		connection_pointer p = _connection_table.find(event->connection);
+
+		ref_ptr<net_connection> *the_connection = p.value();
 		if(the_connection)
 		{
 			(*the_connection)->set_connection_state(net_connection::state_requesting_connection);
@@ -193,18 +206,23 @@ public:
 		type_record *rec = find_connection_type(type_identifier);
 		if(!rec)
 		{
-			torque_connection_reject(event->connection, 0, response_stream.get_buffer());
+			_socket.reject_connection(event->connection, response_stream);
+			//torque_connection_reject(event->connection, 0, response_stream.get_buffer());
 		}
 		net_connection *allocated = (net_connection *) operator new(rec->size);
 		rec->construct_object(allocated);
 		ref_ptr<net_connection> the_connection = allocated;
+		the_connection->set_interface(this);
+
 		if(the_connection->read_connect_request(request_stream, response_stream))
 		{
 			_add_connection(the_connection, event->connection);
-			torque_connection_accept(event->connection, response_stream.get_byte_position(), response_stream.get_buffer());
+			_socket.accept_connection(event->connection, response_stream);
+			//torque_connection_accept(event->connection, response_stream.get_byte_position(), response_stream.get_buffer());
 		}
 		else
-			torque_connection_reject(event->connection, response_stream.get_next_byte_position(), response_stream.get_buffer());
+			_socket.reject_connection(event->connection, response_stream);
+			//torque_connection_reject(event->connection, response_stream.get_next_byte_position(), response_stream.get_buffer());
 	}
 	
 	void _process_arranged_connection_request(torque_socket_event *event)
@@ -225,14 +243,15 @@ public:
 			(*the_connection)->set_connection_state(net_connection::state_accepted);
 			if(!(*the_connection)->read_connect_accept(connection_accept_stream, response_stream))
 			{
-				torque_connection_disconnect(event->connection, response_stream.get_next_byte_position(), response_stream.get_buffer());
+				_socket.disconnect(event->connection, response_stream);
+				//torque_connection_disconnect(event->connection, response_stream.get_next_byte_position(), response_stream.get_buffer());
 				p.remove();
 			}
-			else
+			/*else
 			{
 				(*the_connection)->set_connection_state(net_connection::state_established);
 				(*the_connection)->on_connection_established();
-			}
+			}*/
 		}
 	}
 	
@@ -309,27 +328,38 @@ public:
 		
 	}
 	
-	void connect(SOCKADDR *connect_address, ref_ptr<net_connection> &the_connection)
+	void connect(const address &remote_host, ref_ptr<net_connection> &the_connection)
 	{
 		uint8 connect_buffer[torque_max_status_datagram_size];
 		bit_stream connect_stream(connect_buffer, sizeof(connect_buffer));
 		
 		uint32 type_identifier = get_type_identifier(the_connection);
 		core::write(connect_stream, type_identifier);
+		the_connection->set_interface(this);
+		
 		the_connection->write_connect_request(connect_stream);
 
-		torque_socket_connect(_socket, connect_address, connect_stream.get_next_byte_position(), connect_buffer);
+		torque_connection_id connection_id = _socket.connect(remote_host, connect_stream);
+		_add_connection(the_connection, connection_id);
+		//torque_socket_connect(_socket, connect_address, connect_stream.get_next_byte_position(), connect_buffer);
+		//the_connection->set_torque_connection(connection_id);
 	}
 
 	virtual ~net_interface()
 	{
-		torque_socket_destroy(_socket);
+		collapse_dirty_list();
+		_dirty_list_head._next_dirty_list = 0;
+	}
+	
+	torque_socket &get_socket()
+	{
+		return _socket;
 	}
 
-	net_interface(SOCKADDR &bind_address)
+	net_interface(const address &bind_address) : _socket(bind_address)
 	{
-		_socket = torque_socket_create(&bind_address);
-		
+		//_socket = torque_socket_create(&bind_address);
+
 		_dirty_list_head._next_dirty_list = &_dirty_list_tail;
 		_dirty_list_tail._prev_dirty_list = &_dirty_list_head;
 		_dirty_list_head._prev_dirty_list = 0;
@@ -341,6 +371,6 @@ protected:
 	net_object _dirty_list_head;
 	net_object _dirty_list_tail;	
 	array<connection_type_record> _connection_class_table;
-	hash_table_array<torque_connection, ref_ptr<net_connection> > _connection_table;
+	hash_table_array<torque_connection_id, ref_ptr<net_connection> > _connection_table;
 };
 

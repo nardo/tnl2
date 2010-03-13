@@ -125,12 +125,12 @@ public:
 		delete note;
 	}
 	
-	torque_connection get_torque_connection()
+	torque_connection_id get_torque_connection()
 	{
 		return _connection;
 	}
 	
-	void set_torque_connection(torque_connection connection)
+	void set_torque_connection(torque_connection_id connection)
 	{
 		_connection = connection;
 	}
@@ -196,15 +196,17 @@ public:
 		int32 start = stream.get_bit_position();
 		
 		TorqueLogMessageFormatted(LogNetConnection, ("connection %d: START", _connection) );
-		TorqueLogMessageFormatted(LogNetConnection, ("connection %d: END - %llu bits", _connection, stream.get_bit_position() - start) );
 		
 		time send_delay = _interface->get_process_start_time() - _last_packet_recv_time;
 		if(send_delay > time(2047))
 			send_delay = time(2047);
 		stream.write_integer(uint32(send_delay.get_milliseconds() >> 3), 8);
 		write_packet(stream, note);
+
+		TorqueLogMessageFormatted(LogNetConnection, ("connection %d: END - %llu bits", _connection, stream.get_bit_position() - start) );
 		
-		torque_connection_send_to(_connection, stream.get_next_byte_position(), stream.get_buffer(), &_last_send_sequence);
+		_interface->get_socket().send_to_connection(_connection, stream, &_last_send_sequence);
+		//torque_connection_send_to(_connection, stream.get_next_byte_position(), stream.get_buffer(), &_last_send_sequence);
 		_notify_queue_tail->sequence = _last_send_sequence;
 	}
 
@@ -213,7 +215,7 @@ public:
 		read_packet_rate_info(data);
 		_last_received_send_delay = time((data.read_integer(8) << 3) + 4);
 		_last_packet_recv_time = _interface->get_process_start_time();
-		
+		read_packet(data);
 	}
 
 	/// Called to prepare the connection for packet writing.
@@ -317,14 +319,17 @@ public:
 	
 	bool is_connection_host()
 	{
+		return !_is_initiator;
 	}
 	
 	bool is_connection_initiator()
 	{
+		return _is_initiator;
 	}
 	
-	net_connection()
+	net_connection(bool is_initiator = false)
 	{
+		_is_initiator = is_initiator;
 		_round_trip_time = 0;
 		_send_delay_credit = time(0);
 		_last_update_time = time(0);
@@ -338,6 +343,11 @@ public:
 		_local_rate_changed = true;
 		compute_negotiated_rate();
 		_last_send_sequence = 0;
+	}
+	
+	void set_interface(net_interface *interface)
+	{
+		_interface = interface;
 	}
 	
 	net_interface *get_interface()
@@ -360,6 +370,7 @@ protected:
 		minimum_padding_bits = 32, ///< ask subclasses to reserve at least this much.
 	};
 	
+	bool _is_initiator;
 	net_rate _local_rate; ///< Current communications rate negotiated for this connection.
 	net_rate _remote_rate; ///< Maximum allowable communications rate for this connection.
 	
@@ -370,7 +381,7 @@ protected:
 	packet_notify *_notify_queue_head; ///< Linked list of structures representing the data in sent packets
 	packet_notify *_notify_queue_tail; ///< Tail of the notify queue linked list.  New packets are added to the end of the tail.
 	
-	torque_connection _connection;
+	torque_connection_id _connection;
 	time _last_packet_recv_time; ///< time of the receipt of the last data packet.
 	float32 _round_trip_time; ///< Running average round trip time.
 	time _send_delay_credit; ///< Metric to help compensate for irregularities on fixed rate packet sends.

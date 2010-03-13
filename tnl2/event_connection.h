@@ -437,7 +437,7 @@ public:
 		}
 	}
 	
-	event_connection()
+	event_connection(bool is_initiator = false) : net_connection(is_initiator)
 	{
 		// event management data:
 		

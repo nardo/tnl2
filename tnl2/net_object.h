@@ -134,7 +134,6 @@ protected:
 	enum
 	{
 		is_ghost_flag = bit(1),  ///< Set if this is a ghost.
-		ghostable_flag = bit(3),  ///< Set if this ref_object can ghost at all.
 	};
 	
 	uint32 _net_flags;  ///< Flags field describing this ref_object, from NetFlag.
@@ -150,6 +149,7 @@ public:
 		_prev_dirty_list = NULL;
 		_next_dirty_list = NULL;
 		_dirty_mask_bits = 0;
+		_net_flags = 0;
 		_type_rep = 0;
 	}
 	net_object *_prev_dirty_list;
@@ -161,7 +161,7 @@ public:
 		while(_first_object_ref)
 			_first_object_ref->connection->detach_object(_first_object_ref);
 		
-		if(_dirty_mask_bits)
+		if(_next_dirty_list)
 		{
 			_prev_dirty_list->_next_dirty_list = _next_dirty_list;
 			_next_dirty_list->_prev_dirty_list = _prev_dirty_list;
@@ -189,7 +189,7 @@ public:
 	{
 		assert(or_mask != 0);
 		//Assert(_dirty_mask_bits == 0 || (_prev_dirty_list != NULL || _next_dirty_list != NULL || _dirty_list == this), "Invalid dirty list state.");
-		if(!_dirty_mask_bits)
+		if(!_dirty_mask_bits && _interface)
 			_interface->add_to_dirty_list(this);
 
 		_dirty_mask_bits |= or_mask;
@@ -225,12 +225,6 @@ public:
 	bool is_ghost() const
 	{
 		return (_net_flags & is_ghost_flag) != 0;
-	}
-	
-	/// is_ghostable returns true if this ref_object can be ghosted to any clients.
-	bool is_ghostable() const
-	{
-		return (_net_flags & ghostable_flag) != 0;
 	}
 	
 	/// Return a hash for this ref_object.

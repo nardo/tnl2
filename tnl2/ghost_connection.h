@@ -34,6 +34,10 @@ public:
 	
 	type_database *_type_database;
 	
+	void set_type_database(type_database *type_db)
+	{
+		_type_database = type_db;
+	}
 protected:
 	
 	/// Override of event_connection's alloc_notify, to use the ghost_packet_notify structure.
@@ -148,7 +152,7 @@ protected:
 	{
 		parent::prepare_write_packet();
 		
-		if(!does_ghost_from() && !_ghosting)
+		if(!does_ghost_from() || !_ghosting)
 			return;
 		// first step is to check all our polled ghosts:
 		
@@ -168,9 +172,11 @@ protected:
 			if(!(walk->flags & (ghost_info::scope_local_always)))
 				walk->flags &= ~ghost_info::in_scope;
 		}
-		
 		if(_scope_object)
-			_scope_object->perform_scope_query(this);
+		{
+			logprintf("performing scope query.");
+			_scope_object->perform_scope_query(this);			
+		}
 	}
 	
 	/// Override to write ghost updates into each packet.
@@ -190,6 +196,7 @@ protected:
 		if(!bstream.write_bool(_ghosting && _scope_object.is_valid()))
 			return;
 		
+		logprintf("Filling packet -- %d ghosts to update", _ghost_zero_update_index);
 		// fill a packet (or two) with ghosting data
 		
 		// 2. call scoped objects' priority functions if the flag set is nonzero
@@ -273,7 +280,7 @@ protected:
 				if(walk->flags & ghost_info::not_yet_ghosted)
 				{
 					uint32 class_index = type_rep->class_index;
-					bstream.write_ranged_uint32(class_index, 0, _type_database->get_indexed_class_count());
+					bstream.write_ranged_uint32(class_index, 0, _type_database->get_indexed_class_count() - 1);
 					is_initial_update = true;
 				}
 				
@@ -283,20 +290,8 @@ protected:
 				// now loop through all the fields, and if it's in the update mask, blast it into the bit stream:
 
 				void *object_pointer = (void *) walk->obj;
-				while(type_rep)
-				{
-					for(dictionary<type_database::field_rep>::pointer i = type_rep->fields.first(); i; ++i)
-					{
-						type_database::field_rep *field_rep = i.value();
-						uint32 state_mask = 1 << field_rep->state_index;
-						
-						if(update_mask & state_mask)
-							if(!field_rep->write_function(bstream, (void *) ((uint8 *)object_pointer + field_rep->offset)))
-								returned_mask |= state_mask;
-					}
-					type_rep = type_rep->parent_class;
-				}
-				
+				returned_mask = write_object_update(bstream, object_pointer, type_rep, update_mask);
+
 				if(is_initial_update)
 				{
 					walk->type_rep->initial_update_count++;
@@ -307,7 +302,7 @@ protected:
 					walk->type_rep->total_update_count++;
 					walk->type_rep->total_update_bit_total += bstream.get_bit_position() - start_position;
 				}
-				TorqueLogMessageFormatted(LogGhostConnection, ("ghost_connection %s GHOST %d", walk->type_rep->name.c_str(), bstream.get_bit_position() - 16 - start_position));
+				TorqueLogMessageFormatted(LogGhostConnection, ("ghost_connection %s GHOST %d", walk->type_rep->name.c_str(), bstream.get_bit_position() - start_position));
 				
 				assert((returned_mask & (~update_mask)) == 0); // Cannot set new bits in packUpdate return
 			}
@@ -401,14 +396,17 @@ protected:
 			}
 			else
 			{
+				int32 start_position = bstream.get_bit_position();
 				uint32 end_position = 0;
 				void *object_pointer;
+				type_database::type_rep *ttr;
 				
 				if(!_local_ghosts[index]) // it's a new ghost... cool
 				{
 					uint32 class_index = bstream.read_ranged_uint32(0, _type_database->get_indexed_class_count() -  1);
 					
 					type_database::type_rep *type_rep = _type_database->get_indexed_class(class_index);
+					ttr = type_rep;
 					
 					uint32 instance_size = type_rep->type->size;
 					object_pointer = operator new(instance_size);
@@ -426,16 +424,7 @@ protected:
 					_local_ghosts[index] = obj;
 					
 					is_initial_update = true;
-					while(type_rep)
-					{
-						for(dictionary<type_database::field_rep>::pointer i = type_rep->fields.first(); i; ++i)
-						{
-							// on initial update, read all the fields
-							type_database::field_rep *field_rep = i.value();
-							field_rep->read_function(bstream, (void *) ((uint8 *)object_pointer + field_rep->offset));
-						}
-						type_rep = type_rep->parent_class;
-					}
+					read_object_update(bstream, object_pointer, type_rep, 0xFFFFFFFF);
 					
 					if(!obj->on_ghost_add(this))
 						throw tnl_exception_ghost_add_failed;
@@ -444,22 +433,63 @@ protected:
 				{
 					object_pointer = (void *) _local_ghosts[index];
 					type_database::type_rep *type_rep = _local_ghosts[index]->_type_rep;
+					ttr = type_rep;
 
 					uint32 update_mask = bstream.read_integer(type_rep->max_state_index);
-					while(type_rep)
-					{
-						for(dictionary<type_database::field_rep>::pointer i = type_rep->fields.first(); i; ++i)
-						{
-							type_database::field_rep *field_rep = i.value();
-							uint32 state_mask = 1 << field_rep->state_index;
-							
-							if(update_mask & state_mask)
-								field_rep->read_function(bstream, (void *) ((uint8 *)object_pointer + field_rep->offset));
-						}
-						type_rep = type_rep->parent_class;
-					}
+					read_object_update(bstream, object_pointer, type_rep, update_mask);
+				}
+				TorqueLogMessageFormatted(LogGhostConnection, ("ghost_connection %s read GHOST %d", ttr->name.c_str(), bstream.get_bit_position() - start_position));
+			}
+		}
+	}
+	
+	uint32 write_object_update(bit_stream &bstream, void *object_pointer, type_database::type_rep *type_rep, uint32 update_mask)
+	{
+		uint32 returned_mask = 0;
+		while(type_rep)
+		{
+			for(dictionary<type_database::field_rep>::pointer i = type_rep->fields.first(); i; ++i)
+			{
+				type_database::field_rep *field_rep = i.value();
+				uint32 state_mask = 1 << field_rep->state_index;
+				
+				if(update_mask & state_mask)
+				{
+					bool res;
+					void *field_ptr = (void *) ((uint8 *)object_pointer + field_rep->offset);
+					
+					if(field_rep->compound_type)
+						res = field_rep->compound_type->write(bstream, field_ptr);
+					else
+						res = field_rep->write_function(bstream, field_ptr);
+					if(!res)
+						returned_mask |= state_mask;					
 				}
 			}
+			type_rep = type_rep->parent_class;
+		}
+		return returned_mask;
+	}
+	
+	void read_object_update(bit_stream &bstream, void *object_pointer, type_database::type_rep *type_rep, uint32 update_mask)
+	{
+		while(type_rep)
+		{
+			for(dictionary<type_database::field_rep>::pointer i = type_rep->fields.first(); i; ++i)
+			{
+				type_database::field_rep *field_rep = i.value();
+				uint32 state_mask = 1 << field_rep->state_index;
+				
+				if(update_mask & state_mask)
+				{
+					void *field_ptr = (void *) ((uint8 *)object_pointer + field_rep->offset);
+					if(field_rep->compound_type)
+						field_rep->compound_type->read(bstream, field_ptr);
+					else
+						field_rep->read_function(bstream, field_ptr);	
+				}
+			}
+			type_rep = type_rep->parent_class;
 		}
 	}
 	
@@ -583,7 +613,7 @@ protected:
 	virtual void on_end_ghosting() {}
 	
 public:
-	ghost_connection()
+	ghost_connection(bool is_initiator = false) : event_connection(is_initiator)
 	{
 		// ghost management data:
 		_scope_object = NULL;
@@ -595,6 +625,7 @@ public:
 		_ghost_lookup_table = NULL;
 		_local_ghosts = NULL;
 		_ghost_zero_update_index = 0;
+		register_rpc_methods();
 	}
 	
 	~ghost_connection()
@@ -687,12 +718,13 @@ public:
 	{
 		if (!_scoping || !does_ghost_from())
 			return;
-		if (!object->is_ghostable())
-			return;
 		
 		type_database::type_rep *type_rep = _type_database->find_type(object->get_type_record());
 						
 		assert(type_rep != 0);
+		assert(object->_interface == 0 || object->_interface == _interface);
+		
+		object->_interface = _interface;
 						
 		int32 index = object->get_hash_id() & ghost_lookup_table_mask;
 		
