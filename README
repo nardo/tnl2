@@ -1,19 +1,19 @@
-Torque Network Library
+tnl2 - Torque Network Library version 2
 
-The Torque Network Library is a high-level networking API for real-time simulations with primitives for remote procedure call and object state replication.  The Torque Network Library relies on the Torque Network Platform for low-level networking support.
+tnl2 is a high-level networking API for real-time simulations with primitives for remote procedure call and object state replication.  tnl2 relies on the torque sockets network library for low-level networking support.
 
 Directory structure overview:
 
 license:
-	source code licensing information.  The Torque Network Library
-	is released under the GNU General Public License
-	See: http://www.gnu.org/licenses/gpl.html
+	source code licensing information.  tnl2 is released under the
+	GNU General Public License -- http://www.gnu.org/licenses/gpl.html
 
-tnl-1.5.0:
-	Last public version of TNL released on SourceForge.
+tnl2:
+	Source code for the tnl2 library.  Currently organized as a series
+	of header files intended to be included from within a struct
+	declaration.  See tnl2_test/tnl2_test.cpp for an example of how
+	to include tnl2 in a project.
 
-tnl-1.N:
-	Some later version of TNL from ZAP post core/net split
-
-tnl-_next:
-	Some even later version of the code with a new style of compilation
+tnl2_test:
+	The tnl2 example program.  tnl2_test is a qt application and
+	requires an installation of qt in order to build.
