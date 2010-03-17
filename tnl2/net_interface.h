@@ -24,7 +24,7 @@ public:
 	
 	void set_challenge_response_data(byte_buffer_ptr data)
 	{
-		_socket.set_challenge_response_data(data);
+		_socket.set_challenge_response(data);
 		//torque_socket_set_challenge_response_data(_socket, the_data.get_next_byte_position(), the_data.get_buffer());
 	}
 	
@@ -198,15 +198,15 @@ public:
 	{
 		bit_stream key_stream(event->public_key, event->public_key_size);
 		bit_stream request_stream(event->data, event->data_size);
-		uint8 response_buffer[torque_max_status_datagram_size];
-		bit_stream response_stream(response_buffer, torque_max_status_datagram_size);
+		uint8 response_buffer[torque_sockets_max_status_datagram_size];
+		bit_stream response_stream(response_buffer, torque_sockets_max_status_datagram_size);
 		
 		uint32 type_identifier;
 		core::read(request_stream, type_identifier);
 		type_record *rec = find_connection_type(type_identifier);
 		if(!rec)
 		{
-			_socket.reject_connection(event->connection, response_stream);
+			_socket.disconnect(event->connection, 0, 0);
 			//torque_connection_reject(event->connection, 0, response_stream.get_buffer());
 		}
 		net_connection *allocated = (net_connection *) operator new(rec->size);
@@ -217,11 +217,11 @@ public:
 		if(the_connection->read_connect_request(request_stream, response_stream))
 		{
 			_add_connection(the_connection, event->connection);
-			_socket.accept_connection(event->connection, response_stream);
+			_socket.accept_connection(event->connection);
 			//torque_connection_accept(event->connection, response_stream.get_byte_position(), response_stream.get_buffer());
 		}
 		else
-			_socket.reject_connection(event->connection, response_stream);
+			_socket.disconnect(event->connection, response_stream.get_buffer(), response_stream.get_next_byte_position());
 			//torque_connection_reject(event->connection, response_stream.get_next_byte_position(), response_stream.get_buffer());
 	}
 	
@@ -232,7 +232,6 @@ public:
 
 	void _process_connection_accepted(torque_socket_event *event)
 	{
-		bit_stream connection_accept_stream(event->data, event->data_size);
 		packet_stream response_stream;
 
 		connection_pointer p = _connection_table.find(event->connection);
@@ -241,17 +240,6 @@ public:
 		if(the_connection)
 		{
 			(*the_connection)->set_connection_state(net_connection::state_accepted);
-			if(!(*the_connection)->read_connect_accept(connection_accept_stream, response_stream))
-			{
-				_socket.disconnect(event->connection, response_stream);
-				//torque_connection_disconnect(event->connection, response_stream.get_next_byte_position(), response_stream.get_buffer());
-				p.remove();
-			}
-			/*else
-			{
-				(*the_connection)->set_connection_state(net_connection::state_established);
-				(*the_connection)->on_connection_established();
-			}*/
 		}
 	}
 	
@@ -330,7 +318,7 @@ public:
 	
 	void connect(const address &remote_host, ref_ptr<net_connection> &the_connection)
 	{
-		uint8 connect_buffer[torque_max_status_datagram_size];
+		uint8 connect_buffer[torque_sockets_max_status_datagram_size];
 		bit_stream connect_stream(connect_buffer, sizeof(connect_buffer));
 		
 		uint32 type_identifier = get_type_identifier(the_connection);
@@ -339,7 +327,7 @@ public:
 		
 		the_connection->write_connect_request(connect_stream);
 
-		torque_connection_id connection_id = _socket.connect(remote_host, connect_stream);
+		torque_connection_id connection_id = _socket.connect(remote_host, connect_stream.get_buffer(), connect_stream.get_next_byte_position());
 		_add_connection(the_connection, connection_id);
 		//torque_socket_connect(_socket, connect_address, connect_stream.get_next_byte_position(), connect_buffer);
 		//the_connection->set_torque_connection(connection_id);

@@ -13,7 +13,7 @@
 namespace core
 {
 	#include "core/core.h"
-	
+
 	uint32 hash_buffer(const void *buffer, uint32 len)
 	{
 		uint8 *buf = (uint8 *) buffer;

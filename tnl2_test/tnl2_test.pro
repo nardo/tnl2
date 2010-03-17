@@ -76,10 +76,11 @@ HEADERS += tnl2_test_widget.h \
     ../../torque_sockets/torque_sockets/client_puzzle.h \
     ../../torque_sockets/torque_sockets/buffer_utils.h \
     ../../torque_sockets/torque_sockets/asymmetric_key.h \
-    ../../torque_sockets/torque_sockets/address.h
+    ../../torque_sockets/torque_sockets/address.h \
+    ../../torque_sockets/torque_sockets/pending_connection.h
 FORMS += 
 INCLUDEPATH += ../tnl2 \
-	../../torque_sockets/ \
+    ../../torque_sockets/ \
     ../../torque_sockets/lib/libtomcrypt/src/headers
 LIBS += -L../../torque_sockets/lib/libtomcrypt \
     -L../../torque_sockets/lib/libtommath \

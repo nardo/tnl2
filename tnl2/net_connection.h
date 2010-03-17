@@ -306,7 +306,7 @@ public:
 	
 	bool window_full()
 	{
-		return _notify_queue_head && (_last_send_sequence - _notify_queue_head->sequence >= torque_packet_window_size);
+		return _notify_queue_head && (_last_send_sequence - _notify_queue_head->sequence >= torque_sockets_packet_window_size);
 	}
 			
 			
