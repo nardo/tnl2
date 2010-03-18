@@ -309,8 +309,9 @@ public:
 			
 			//int32 start = bstream.get_bit_position();
 			uint32 rpc_index = bstream.read_integer(_rpc_id_bit_size);
+			fflush(stdout); // FIXME
 			if(rpc_index >= _rpc_count)
-				assert(0); //throw tnl_exception_invalid_packet;
+				assert(0); // FIXME: throw tnl_exception_invalid_packet;
 			
 			rpc_record &the_rpc = rpc_methods[rpc_index];
 			

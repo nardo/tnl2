@@ -185,12 +185,13 @@ public:
 		bit_stream challenge_response(event->data, event->data_size);
 		byte_buffer_ptr public_key = new byte_buffer(event->public_key, event->public_key_size);
 		connection_pointer p = _connection_table.find(event->connection);
-
 		ref_ptr<net_connection> *the_connection = p.value();
+		logprintf("Got a challenge response -- %d", bool(p));
 		if(the_connection)
 		{
 			(*the_connection)->set_connection_state(net_connection::state_requesting_connection);
 			(*the_connection)->on_challenge_response(challenge_response, public_key);
+			_socket.accept_connection_challenge(event->connection);
 		}
 	}
 		
@@ -328,6 +329,7 @@ public:
 		the_connection->write_connect_request(connect_stream);
 
 		torque_connection_id connection_id = _socket.connect(remote_host, connect_stream.get_buffer(), connect_stream.get_next_byte_position());
+		logprintf("opened connection id = %d", connection_id);
 		_add_connection(the_connection, connection_id);
 		//torque_socket_connect(_socket, connect_address, connect_stream.get_next_byte_position(), connect_buffer);
 		//the_connection->set_torque_connection(connection_id);

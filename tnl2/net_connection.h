@@ -204,7 +204,8 @@ public:
 		write_packet(stream, note);
 
 		TorqueLogMessageFormatted(LogNetConnection, ("connection %d: END - %llu bits", _connection, stream.get_bit_position() - start) );
-		
+		logprintf("NC packet write data: %s", buffer_encode_base_16(stream.get_buffer(), stream.get_next_byte_position())->get_buffer());
+
 		_interface->get_socket().send_to_connection(_connection, stream, &_last_send_sequence);
 		//torque_connection_send_to(_connection, stream.get_next_byte_position(), stream.get_buffer(), &_last_send_sequence);
 		_notify_queue_tail->sequence = _last_send_sequence;
@@ -215,6 +216,7 @@ public:
 		read_packet_rate_info(data);
 		_last_received_send_delay = time((data.read_integer(8) << 3) + 4);
 		_last_packet_recv_time = _interface->get_process_start_time();
+		logprintf("NC packet read data: %s", buffer_encode_base_16(data.get_buffer(), data.get_next_byte_position())->get_buffer());
 		read_packet(data);
 	}
 
