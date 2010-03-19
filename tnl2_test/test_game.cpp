@@ -12,8 +12,7 @@
 
 namespace core
 {
-	#include "core/core.h"
-
+#include "core/core.h"
 	uint32 hash_buffer(const void *buffer, uint32 len)
 	{
 		uint8 *buf = (uint8 *) buffer;
@@ -49,7 +48,7 @@ namespace core
 
 namespace core
 {
-	struct tnl : net {	
+	struct tnl {
 		#include "tnl2.h"
 	};
 
@@ -127,3 +126,44 @@ void render_game_scene(int game_index)
 		game[game_index]->render_frame();
 }
 
+extern "C"
+{
+	void *init_game(int server, unsigned index)
+	{
+		ltc_mp = ltm_desc;
+		tnl_test::test_game *g;
+		
+		SOCKADDR interface_bind_address, ping_address;
+		net::address a;
+		a.set_port(28000);
+		a.to_sockaddr(&ping_address);
+		if(server)
+			a.set_port(28000 + index);
+		else
+			a.set_port(0);
+		a.to_sockaddr(&interface_bind_address);
+		
+		g = new tnl_test::test_game(server, interface_bind_address, ping_address);
+		return g;
+	}
+	void shutdown_game(void *game)
+	{
+		delete (tnl_test::test_game *) game;
+	}
+	void click_game(void *the_game, float32 x, float32 y)
+	{
+		tnl_test::position p;
+		p.x = x;
+		p.y = y;
+		((tnl_test::test_game *) the_game)->move_my_player_to(p);
+	}
+	void tick_game(void *the_game, unsigned index)
+	{
+		core::_log_index = index;
+		((tnl_test::test_game *) the_game)->tick();
+	}
+	void render_game_scene(void *the_game, unsigned width, unsigned height)
+	{
+		((tnl_test::test_game *) the_game)->render_frame();
+	}
+}

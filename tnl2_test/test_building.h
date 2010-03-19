@@ -19,7 +19,7 @@ public:
 	position lower_right; ///< Lower right corner of the building rectangle on the screen.
 	
 	/// The building constructor creates a random position and extent for the building, and marks it as scopeAlways.
-	building(random_generator *random_gen = 0)
+	building(net::random_generator *random_gen = 0)
 	{
 		// place the "building" in a random position on the screen
 		if(random_gen)

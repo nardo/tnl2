@@ -23,7 +23,7 @@ public:
 	player_type _player_type; ///< What type of player is this?
 	
 	/// player constructor, assigns a random position in the playing field to the player, and if it is AI controlled will pick a first destination point.
-	player(player_type pt = player_type_ai_dummy, random_generator *random_gen = 0)
+	player(player_type pt = player_type_ai_dummy, net::random_generator *random_gen = 0)
 	{
 		// assign a random starting position for the player.
 		if(random_gen)
@@ -125,7 +125,7 @@ public:
 	/// Move this object along its path.
 	///
 	/// If it hits the end point, and it's an AI, it will generate a new destination.
-	void update(float32 time_delta, random_generator *random_gen)
+	void update(float32 time_delta, net::random_generator *random_gen)
 	{
 		_t += _t_delta * time_delta;
 		if(_t >= 1.0)

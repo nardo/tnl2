@@ -14,7 +14,7 @@ class net_interface : public ref_object
 	};
 	
 public:
-	void set_private_key(asymmetric_key_ptr the_key)
+	void set_private_key(net::asymmetric_key_ptr the_key)
 	{
 		byte_buffer_ptr key_buffer = the_key->get_private_key();
 		torque_socket_set_private_key(_socket, key_buffer->get_buffer_size(), key_buffer->get_buffer());
@@ -151,13 +151,13 @@ public:
 		obj->_prev_dirty_list = &_dirty_list_head;
 	}
 	
-	time get_process_start_time()
+	net::time get_process_start_time()
 	{
 		return _process_start_time;
 	}
 	void check_for_packet_sends()
 	{
-		_process_start_time = time::get_current();
+		_process_start_time = net::time::get_current();
 		collapse_dirty_list();
 		for(uint32 i = 0; i < _connection_table.size(); i++)
 		{
@@ -223,7 +223,7 @@ public:
 
 	void _process_connection_accepted(torque_socket_event *event)
 	{
-		packet_stream response_stream;
+		net::packet_stream response_stream;
 
 		connection_pointer p = _connection_table.find(event->connection);
 
@@ -307,7 +307,7 @@ public:
 		
 	}
 	
-	void connect(const address &remote_host, ref_ptr<net_connection> &the_connection)
+	void connect(const net::address &remote_host, ref_ptr<net_connection> &the_connection)
 	{
 		uint8 connect_buffer[torque_sockets_max_status_datagram_size];
 		bit_stream connect_stream(connect_buffer, sizeof(connect_buffer));
@@ -336,7 +336,7 @@ public:
 		return _socket;
 	}
 
-	net_interface(const address &bind_address)
+	net_interface(const net::address &bind_address)
 	{
 		sockaddr sa_bind_address;
 		bind_address.to_sockaddr(&sa_bind_address);
@@ -349,7 +349,7 @@ public:
 	}
 protected:
 	torque_socket_handle _socket;
-	time _process_start_time;	
+	net::time _process_start_time;
 	net_object _dirty_list_head;
 	net_object _dirty_list_tail;	
 	array<connection_type_record> _connection_class_table;

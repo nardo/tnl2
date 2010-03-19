@@ -27,6 +27,7 @@ protected:
 	{
 	public:
 		virtual functor *create() = 0;
+		virtual ~functor_creator() {}
 	};
 	
 	template<typename signature> class functor_creator_decl : public functor_creator

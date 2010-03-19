@@ -41,7 +41,6 @@ void tnl2_test_widget::paintGL()
 //! [8]
 void tnl2_test_widget::resizeGL(int width, int height)
 {
-    int side = qMin(width, height);
     //glViewport((width - side) / 2, (height - side) / 2, side, side);
     glViewport(0, 0, width, height);
 	glMatrixMode(GL_PROJECTION);
@@ -61,9 +60,7 @@ void tnl2_test_widget::mousePressEvent(QMouseEvent *event)
 //! [9]
 
 //! [10]
-void tnl2_test_widget::mouseMoveEvent(QMouseEvent *event)
+void tnl2_test_widget::mouseMoveEvent(QMouseEvent *)
 {
-    int dx = event->x() - lastPos.x();
-    int dy = event->y() - lastPos.y();
 }
 //! [10]

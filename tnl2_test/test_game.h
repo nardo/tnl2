@@ -6,10 +6,10 @@ public:
 	array<building *> _buildings; ///< vector of _buildings in the game
 	bool _is_server; ///< was this game created to be a server?
 	test_net_interface *_net_interface; ///< network interface for this game
-	time _last_time; ///< last time that tick() was called
+	net::time _last_time; ///< last time that tick() was called
 	safe_ptr<player> _server_player; ///< the player that the server controls
 	safe_ptr<player> _client_player; ///< the player that this client controls, if this game is a client
-	random_generator _random;
+	net::random_generator _random;
 	context _context;
 	type_database _type_database;
 	
@@ -26,7 +26,7 @@ public:
 		//TNL::AsymmetricKey *theKey = new TNL::AsymmetricKey(32);
 		//_net_interface->setPrivateKey(theKey);
 		//_net_interface->setRequiresKeyExchange(true);
-		random_generator g;
+		net::random_generator g;
 		
 		tnl_begin_class(_type_database, position, empty_type, false)
 		tnl_slot(_type_database, position, x, 0)
@@ -36,7 +36,7 @@ public:
 		player::register_class(_type_database);
 		building::register_class(_type_database);
 
-		_last_time = time::get_current();
+		_last_time = net::time::get_current();
 		
 		if(_is_server)
 		{
@@ -78,7 +78,7 @@ public:
 	/// Called periodically by the platform windowing code, tick will update all the _players in the simulation as well as tick() the game's network interface.
 	void tick()
 	{
-		time current_time = time::get_current();
+		net::time current_time = net::time::get_current();
 		if(current_time == _last_time)
 			return;
 		

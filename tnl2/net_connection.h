@@ -40,8 +40,8 @@ public:
 	struct packet_notify
 	{
 		// packet stream notify stuff:
-		bool rate_changed;  ///< True if this packet requested a change of rate.
-		time send_time;     ///< getRealMilliseconds() when packet was sent.
+		bool rate_changed; ///< True if this packet requested a change of rate.
+		net::time send_time; ///< getRealMilliseconds() when packet was sent.
 		uint32 sequence;
 		
 		packet_notify *next_packet; ///< Pointer to the next packet sent on this connection
@@ -92,7 +92,7 @@ public:
 	{
 	}
 	
-	time _highest_acked_send_time;
+	net::time _highest_acked_send_time;
 	
 	virtual void on_packet_notify(uint32 send_sequence, bool recvd)
 	{
@@ -109,9 +109,9 @@ public:
 		{
 			_highest_acked_send_time = note->send_time;
 			// Running average of roundTrip time
-			if(_highest_acked_send_time != time(0))
+			if(_highest_acked_send_time != net::time(0))
 			{
-				time round_trip_delta = _interface->get_process_start_time() - (_highest_acked_send_time + _last_received_send_delay);
+				net::time round_trip_delta = _interface->get_process_start_time() - (_highest_acked_send_time + _last_received_send_delay);
 				_round_trip_time = _round_trip_time * 0.9f + round_trip_delta.get_milliseconds() * 0.1f;
 				if(_round_trip_time < 0)
 					_round_trip_time = 0;
@@ -163,9 +163,9 @@ public:
 	/// Checks to see if a packet should be sent at the currentTime to the remote host.
 	///
 	/// If force is true and there is space in the window, it will always send a packet.
-	void check_packet_send(bool force, time current_time)
+	void check_packet_send(bool force, net::time current_time)
 	{
-		time delay = time( _current_packet_send_period );
+		net::time delay = net::time( _current_packet_send_period );
 		
 		if(!force)
 		{
@@ -173,13 +173,13 @@ public:
 				return;
 			
 			_send_delay_credit = current_time - (_last_update_time + delay - _send_delay_credit);
-			if(_send_delay_credit > time(1000))
-				_send_delay_credit = time(1000);
+			if(_send_delay_credit > net::time(1000))
+				_send_delay_credit = net::time(1000);
 		}
 		prepare_write_packet();
 		if(window_full() || !is_data_to_transmit())
 			return;
-		packet_stream stream(_current_packet_send_size);
+		net::packet_stream stream(_current_packet_send_size);
 		_last_update_time = current_time;
 		
 		packet_notify *note = alloc_notify();
@@ -197,14 +197,14 @@ public:
 		
 		TorqueLogMessageFormatted(LogNetConnection, ("connection %d: START", _connection) );
 		
-		time send_delay = _interface->get_process_start_time() - _last_packet_recv_time;
-		if(send_delay > time(2047))
-			send_delay = time(2047);
+		net::time send_delay = _interface->get_process_start_time() - _last_packet_recv_time;
+		if(send_delay > net::time(2047))
+			send_delay = net::time(2047);
 		stream.write_integer(uint32(send_delay.get_milliseconds() >> 3), 8);
 		write_packet(stream, note);
 
 		TorqueLogMessageFormatted(LogNetConnection, ("connection %d: END - %llu bits", _connection, stream.get_bit_position() - start) );
-		logprintf("NC packet write data: %s", buffer_encode_base_16(stream.get_buffer(), stream.get_next_byte_position())->get_buffer());
+		logprintf("NC packet write data: %s", net::buffer_encode_base_16(stream.get_buffer(), stream.get_next_byte_position())->get_buffer());
 
 		torque_socket_send_to_connection(_interface->get_socket(), _connection, stream.get_next_byte_position(), stream.get_buffer(), &_last_send_sequence);
 		//torque_connection_send_to(_connection, stream.get_next_byte_position(), stream.get_buffer(), &_last_send_sequence);
@@ -214,9 +214,9 @@ public:
 	virtual void on_packet(uint32 sequence, bit_stream &data)
 	{
 		read_packet_rate_info(data);
-		_last_received_send_delay = time((data.read_integer(8) << 3) + 4);
+		_last_received_send_delay = net::time((data.read_integer(8) << 3) + 4);
 		_last_packet_recv_time = _interface->get_process_start_time();
-		logprintf("NC packet read data: %s", buffer_encode_base_16(data.get_buffer(), data.get_next_byte_position())->get_buffer());
+		logprintf("NC packet read data: %s", net::buffer_encode_base_16(data.get_buffer(), data.get_next_byte_position())->get_buffer());
 		read_packet(data);
 	}
 
@@ -296,8 +296,8 @@ public:
 		_current_packet_send_size = uint32(max_bandwidth * _current_packet_send_period * 0.001f);
 		
 		// make sure we don't try to overwrite the maximum packet size
-		if(_current_packet_send_size > udp_socket::max_datagram_size)
-			_current_packet_send_size = udp_socket::max_datagram_size;
+		if(_current_packet_send_size > net::udp_socket::max_datagram_size)
+			_current_packet_send_size = net::udp_socket::max_datagram_size;
 	}
 	
 	/// Returns the notify structure for the current packet write, or last written packet.
@@ -345,6 +345,7 @@ public:
 		_local_rate_changed = true;
 		compute_negotiated_rate();
 		_last_send_sequence = 0;
+		_state = state_start;
 	}
 	
 	void set_interface(net_interface *interface)
@@ -384,11 +385,11 @@ protected:
 	packet_notify *_notify_queue_tail; ///< Tail of the notify queue linked list.  New packets are added to the end of the tail.
 	
 	torque_connection_id _connection;
-	time _last_packet_recv_time; ///< time of the receipt of the last data packet.
+	net::time _last_packet_recv_time; ///< time of the receipt of the last data packet.
 	float32 _round_trip_time; ///< Running average round trip time.
-	time _send_delay_credit; ///< Metric to help compensate for irregularities on fixed rate packet sends.
-	time _last_update_time;
+	net::time _send_delay_credit; ///< Metric to help compensate for irregularities on fixed rate packet sends.
+	net::time _last_update_time;
 	safe_ptr<net_interface> _interface;
 	uint32 _last_send_sequence;
-	time _last_received_send_delay;
+	net::time _last_received_send_delay;
 };

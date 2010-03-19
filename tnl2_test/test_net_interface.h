@@ -6,12 +6,12 @@ public:
 	/// Constants used in this net_interface
 	enum Constants {
 		PingDelayTime = 2000, ///< Milliseconds to wait between sending GamePingRequest packets.
-		GamePingRequest = torque_socket::first_valid_info_packet_id, ///< Byte value of the first byte of a GamePingRequest packet.
+		GamePingRequest = net::torque_socket::first_valid_info_packet_id, ///< Byte value of the first byte of a GamePingRequest packet.
 		GamePingResponse, ///< Byte value of the first byte of a GamePingResponse packet.
 	};
 	
 	bool _pinging_servers; ///< True if this is a client that is pinging for active servers.
-	time _last_ping_time; ///< The last platform time that a GamePingRequest was sent from this network interface.
+	net::time _last_ping_time; ///< The last platform time that a GamePingRequest was sent from this network interface.
 	bool _is_server; ///< True if this network interface is a server, false if it is a client.
 	
 	safe_ptr<test_connection> _connection_to_server; ///< A safe pointer to the current connection to the server, if this is a client.
@@ -36,9 +36,9 @@ public:
 	/// handle_info_packet overrides the method in the net_interface class to handle processing of the GamePingRequest and GamePingResponse packet types.
 	void _process_socket_packet(torque_socket_event *event)
 	{
-		packet_stream write_stream;
+		net::packet_stream write_stream;
 		uint8 packet_type = event->data[0];
-		address from(event->source_address);
+		net::address from(event->source_address);
 		string from_string = from.to_string();
 		logprintf("%s - received socket packet, packet_type == %d.", from_string.c_str(), packet_type);
 		if(packet_type == GamePingRequest && _is_server)
@@ -57,7 +57,7 @@ public:
 			logprintf("%s - received ping response.", from_string.c_str());
 			
 			ref_ptr<net_connection> the_connection = new test_connection(true);
-			address from(event->source_address);
+			net::address from(event->source_address);
 			connect(from, the_connection); 
 			logprintf("Connecting to server: %s", from_string.c_str());
 			
@@ -68,19 +68,19 @@ public:
 	/// send_ping sends a GamePingRequest packet to _ping_address of this test_net_interface.
 	void send_ping()
 	{
-		packet_stream write_stream;
+		net::packet_stream write_stream;
 		
 		core::write(write_stream, uint8(GamePingRequest));
 		torque_socket_send_to(_socket, &_ping_address, write_stream.get_next_byte_position(), write_stream.get_buffer());
 
-		string ping_address_string = address(_ping_address).to_string();
+		string ping_address_string = net::address(_ping_address).to_string();
 		logprintf("%s - sending ping.", ping_address_string.c_str());
 	}
 	
 	/// Tick checks to see if it is an appropriate time to send a ping packet, in addition to checking for incoming packets and processing connections.
 	void tick()
 	{
-		time current_time = time::get_current();
+		net::time current_time = net::time::get_current();
 		
 		if(_pinging_servers && (_last_ping_time + PingDelayTime) < current_time)
 		{

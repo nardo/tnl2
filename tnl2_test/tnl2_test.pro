@@ -81,9 +81,9 @@ HEADERS += tnl2_test_widget.h \
     ../../torque_sockets/torque_sockets_reference_api.h \
     ../../torque_sockets/torque_sockets/torque_sockets_c_implementation.h
 FORMS += 
-INCLUDEPATH += ../tnl2 \
-    ../../torque_sockets/ \
-    ../../torque_sockets/lib/libtomcrypt/src/headers
+INCLUDEPATH += ../tnl2/ \
+	../../torque_sockets/ \
+	../../torque_sockets/lib/libtomcrypt/src/headers
 LIBS += -L../../torque_sockets/lib/libtomcrypt \
     -L../../torque_sockets/lib/libtommath \
     -ltomcrypt \
