@@ -1,0 +1,496 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 45;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1D3822201153D076009D94C5 /* test_game.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1D38221C1153D076009D94C5 /* test_game.cpp */; };
+		1D3822721153D270009D94C5 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D3822711153D270009D94C5 /* OpenGL.framework */; };
+		1D3822741153D280009D94C5 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D3822731153D280009D94C5 /* CoreServices.framework */; };
+		1D3822791153D2A1009D94C5 /* libtomcrypt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D3822781153D2A1009D94C5 /* libtomcrypt.a */; };
+		1D38227B1153D2B5009D94C5 /* libtommath.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D38227A1153D2B5009D94C5 /* libtommath.a */; };
+		1D38228E1153D404009D94C5 /* tnl2_test_view.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D38228D1153D404009D94C5 /* tnl2_test_view.m */; };
+		1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1DDD58140DA1D0A300B32029 /* MainMenu.xib */; };
+		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
+		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
+		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		089C165DFE840E0CC02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
+		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
+		1D38221A1153D076009D94C5 /* test_building.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = test_building.h; path = ../tnl2_test/test_building.h; sourceTree = SOURCE_ROOT; };
+		1D38221B1153D076009D94C5 /* test_connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = test_connection.h; path = ../tnl2_test/test_connection.h; sourceTree = SOURCE_ROOT; };
+		1D38221C1153D076009D94C5 /* test_game.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = test_game.cpp; path = ../tnl2_test/test_game.cpp; sourceTree = SOURCE_ROOT; };
+		1D38221D1153D076009D94C5 /* test_game.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = test_game.h; path = ../tnl2_test/test_game.h; sourceTree = SOURCE_ROOT; };
+		1D38221E1153D076009D94C5 /* test_net_interface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = test_net_interface.h; path = ../tnl2_test/test_net_interface.h; sourceTree = SOURCE_ROOT; };
+		1D38221F1153D076009D94C5 /* test_player.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = test_player.h; path = ../tnl2_test/test_player.h; sourceTree = SOURCE_ROOT; };
+		1D3822241153D0A7009D94C5 /* algorithm_templates.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = algorithm_templates.h; path = ../../torque_sockets/core/algorithm_templates.h; sourceTree = SOURCE_ROOT; };
+		1D3822251153D0A7009D94C5 /* array.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = array.h; path = ../../torque_sockets/core/array.h; sourceTree = SOURCE_ROOT; };
+		1D3822261153D0A7009D94C5 /* assert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = assert.h; path = ../../torque_sockets/core/assert.h; sourceTree = SOURCE_ROOT; };
+		1D3822271153D0A7009D94C5 /* base_type_declarations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = base_type_declarations.h; path = ../../torque_sockets/core/base_type_declarations.h; sourceTree = SOURCE_ROOT; };
+		1D3822281153D0A7009D94C5 /* base_type_io.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = base_type_io.h; path = ../../torque_sockets/core/base_type_io.h; sourceTree = SOURCE_ROOT; };
+		1D3822291153D0A7009D94C5 /* base_type_traits.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = base_type_traits.h; path = ../../torque_sockets/core/base_type_traits.h; sourceTree = SOURCE_ROOT; };
+		1D38222A1153D0A7009D94C5 /* base_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = base_types.h; path = ../../torque_sockets/core/base_types.h; sourceTree = SOURCE_ROOT; };
+		1D38222B1153D0A7009D94C5 /* bit_stream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = bit_stream.h; path = ../../torque_sockets/core/bit_stream.h; sourceTree = SOURCE_ROOT; };
+		1D38222C1153D0A7009D94C5 /* byte_buffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = byte_buffer.h; path = ../../torque_sockets/core/byte_buffer.h; sourceTree = SOURCE_ROOT; };
+		1D38222D1153D0A7009D94C5 /* byte_stream_fixed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = byte_stream_fixed.h; path = ../../torque_sockets/core/byte_stream_fixed.h; sourceTree = SOURCE_ROOT; };
+		1D38222E1153D0A7009D94C5 /* construct.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = construct.h; path = ../../torque_sockets/core/construct.h; sourceTree = SOURCE_ROOT; };
+		1D38222F1153D0A7009D94C5 /* context.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = context.h; path = ../../torque_sockets/core/context.h; sourceTree = SOURCE_ROOT; };
+		1D3822301153D0A7009D94C5 /* core.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = core.h; path = ../../torque_sockets/core/core.h; sourceTree = SOURCE_ROOT; };
+		1D3822311153D0A7009D94C5 /* cpu_endian.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cpu_endian.h; path = ../../torque_sockets/core/cpu_endian.h; sourceTree = SOURCE_ROOT; };
+		1D3822321153D0A7009D94C5 /* dictionary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dictionary.h; path = ../../torque_sockets/core/dictionary.h; sourceTree = SOURCE_ROOT; };
+		1D3822331153D0A7009D94C5 /* formatted_string_buffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = formatted_string_buffer.h; path = ../../torque_sockets/core/formatted_string_buffer.h; sourceTree = SOURCE_ROOT; };
+		1D3822341153D0A7009D94C5 /* function_record.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = function_record.h; path = ../../torque_sockets/core/function_record.h; sourceTree = SOURCE_ROOT; };
+		1D3822351153D0A7009D94C5 /* functor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = functor.h; path = ../../torque_sockets/core/functor.h; sourceTree = SOURCE_ROOT; };
+		1D3822361153D0A7009D94C5 /* hash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hash.h; path = ../../torque_sockets/core/hash.h; sourceTree = SOURCE_ROOT; };
+		1D3822371153D0A7009D94C5 /* hash_table_array.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hash_table_array.h; path = ../../torque_sockets/core/hash_table_array.h; sourceTree = SOURCE_ROOT; };
+		1D3822381153D0A7009D94C5 /* hash_table_flat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hash_table_flat.h; path = ../../torque_sockets/core/hash_table_flat.h; sourceTree = SOURCE_ROOT; };
+		1D3822391153D0A7009D94C5 /* indexed_string.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = indexed_string.h; path = ../../torque_sockets/core/indexed_string.h; sourceTree = SOURCE_ROOT; };
+		1D38223A1153D0A7009D94C5 /* log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = log.h; path = ../../torque_sockets/core/log.h; sourceTree = SOURCE_ROOT; };
+		1D38223B1153D0A7009D94C5 /* memory_functions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = memory_functions.h; path = ../../torque_sockets/core/memory_functions.h; sourceTree = SOURCE_ROOT; };
+		1D38223C1153D0A7009D94C5 /* page_allocator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = page_allocator.h; path = ../../torque_sockets/core/page_allocator.h; sourceTree = SOURCE_ROOT; };
+		1D38223D1153D0A7009D94C5 /* platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = platform.h; path = ../../torque_sockets/core/platform.h; sourceTree = SOURCE_ROOT; };
+		1D38223E1153D0A7009D94C5 /* power_two_functions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = power_two_functions.h; path = ../../torque_sockets/core/power_two_functions.h; sourceTree = SOURCE_ROOT; };
+		1D38223F1153D0A7009D94C5 /* ref_object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ref_object.h; path = ../../torque_sockets/core/ref_object.h; sourceTree = SOURCE_ROOT; };
+		1D3822401153D0A7009D94C5 /* small_block_allocator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = small_block_allocator.h; path = ../../torque_sockets/core/small_block_allocator.h; sourceTree = SOURCE_ROOT; };
+		1D3822411153D0A7009D94C5 /* static_to_indexed_string_map.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = static_to_indexed_string_map.h; path = ../../torque_sockets/core/static_to_indexed_string_map.h; sourceTree = SOURCE_ROOT; };
+		1D3822421153D0A7009D94C5 /* string.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = string.h; path = ../../torque_sockets/core/string.h; sourceTree = SOURCE_ROOT; };
+		1D3822431153D0A7009D94C5 /* system_includes_linux.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = system_includes_linux.h; path = ../../torque_sockets/core/system_includes_linux.h; sourceTree = SOURCE_ROOT; };
+		1D3822441153D0A7009D94C5 /* system_includes_mac_osx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = system_includes_mac_osx.h; path = ../../torque_sockets/core/system_includes_mac_osx.h; sourceTree = SOURCE_ROOT; };
+		1D3822451153D0A7009D94C5 /* system_includes_win32.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = system_includes_win32.h; path = ../../torque_sockets/core/system_includes_win32.h; sourceTree = SOURCE_ROOT; };
+		1D3822461153D0A7009D94C5 /* thread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = thread.h; path = ../../torque_sockets/core/thread.h; sourceTree = SOURCE_ROOT; };
+		1D3822471153D0A7009D94C5 /* thread_queue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = thread_queue.h; path = ../../torque_sockets/core/thread_queue.h; sourceTree = SOURCE_ROOT; };
+		1D3822481153D0A7009D94C5 /* type_database.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = type_database.h; path = ../../torque_sockets/core/type_database.h; sourceTree = SOURCE_ROOT; };
+		1D3822491153D0A7009D94C5 /* type_record.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = type_record.h; path = ../../torque_sockets/core/type_record.h; sourceTree = SOURCE_ROOT; };
+		1D38224A1153D0A7009D94C5 /* utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = utils.h; path = ../../torque_sockets/core/utils.h; sourceTree = SOURCE_ROOT; };
+		1D38224B1153D0A7009D94C5 /* zone_allocator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = zone_allocator.h; path = ../../torque_sockets/core/zone_allocator.h; sourceTree = SOURCE_ROOT; };
+		1D38224C1153D0BE009D94C5 /* address.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = address.h; path = ../../torque_sockets/torque_sockets/address.h; sourceTree = SOURCE_ROOT; };
+		1D38224D1153D0BE009D94C5 /* asymmetric_key.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = asymmetric_key.h; path = ../../torque_sockets/torque_sockets/asymmetric_key.h; sourceTree = SOURCE_ROOT; };
+		1D38224E1153D0BE009D94C5 /* buffer_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = buffer_utils.h; path = ../../torque_sockets/torque_sockets/buffer_utils.h; sourceTree = SOURCE_ROOT; };
+		1D38224F1153D0BE009D94C5 /* client_puzzle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = client_puzzle.h; path = ../../torque_sockets/torque_sockets/client_puzzle.h; sourceTree = SOURCE_ROOT; };
+		1D3822501153D0BE009D94C5 /* nonce.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = nonce.h; path = ../../torque_sockets/torque_sockets/nonce.h; sourceTree = SOURCE_ROOT; };
+		1D3822511153D0BE009D94C5 /* old_arranged_connection_logic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = old_arranged_connection_logic.h; path = ../../torque_sockets/torque_sockets/old_arranged_connection_logic.h; sourceTree = SOURCE_ROOT; };
+		1D3822521153D0BE009D94C5 /* packet_stream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = packet_stream.h; path = ../../torque_sockets/torque_sockets/packet_stream.h; sourceTree = SOURCE_ROOT; };
+		1D3822531153D0BE009D94C5 /* pending_connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pending_connection.h; path = ../../torque_sockets/torque_sockets/pending_connection.h; sourceTree = SOURCE_ROOT; };
+		1D3822541153D0BE009D94C5 /* random_generator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = random_generator.h; path = ../../torque_sockets/torque_sockets/random_generator.h; sourceTree = SOURCE_ROOT; };
+		1D3822551153D0BE009D94C5 /* scratch_pad.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = scratch_pad.h; path = ../../torque_sockets/torque_sockets/scratch_pad.h; sourceTree = SOURCE_ROOT; };
+		1D3822561153D0BE009D94C5 /* sockets.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sockets.h; path = ../../torque_sockets/torque_sockets/sockets.h; sourceTree = SOURCE_ROOT; };
+		1D3822571153D0BE009D94C5 /* symmetric_cipher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = symmetric_cipher.h; path = ../../torque_sockets/torque_sockets/symmetric_cipher.h; sourceTree = SOURCE_ROOT; };
+		1D3822581153D0BE009D94C5 /* time.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = time.h; path = ../../torque_sockets/torque_sockets/time.h; sourceTree = SOURCE_ROOT; };
+		1D3822591153D0BE009D94C5 /* torque_connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = torque_connection.h; path = ../../torque_sockets/torque_sockets/torque_connection.h; sourceTree = SOURCE_ROOT; };
+		1D38225A1153D0BE009D94C5 /* torque_socket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = torque_socket.h; path = ../../torque_sockets/torque_sockets/torque_socket.h; sourceTree = SOURCE_ROOT; };
+		1D38225B1153D0BE009D94C5 /* torque_sockets.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = torque_sockets.h; path = ../../torque_sockets/torque_sockets/torque_sockets.h; sourceTree = SOURCE_ROOT; };
+		1D38225C1153D0BE009D94C5 /* torque_sockets_c_api.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = torque_sockets_c_api.h; path = ../../torque_sockets/torque_sockets/torque_sockets_c_api.h; sourceTree = SOURCE_ROOT; };
+		1D38225D1153D0BE009D94C5 /* torque_sockets_c_implementation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = torque_sockets_c_implementation.h; path = ../../torque_sockets/torque_sockets/torque_sockets_c_implementation.h; sourceTree = SOURCE_ROOT; };
+		1D38225E1153D0BE009D94C5 /* udp_socket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = udp_socket.h; path = ../../torque_sockets/torque_sockets/udp_socket.h; sourceTree = SOURCE_ROOT; };
+		1D38225F1153D0CD009D94C5 /* event_connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = event_connection.h; path = ../tnl2/event_connection.h; sourceTree = SOURCE_ROOT; };
+		1D3822601153D0CD009D94C5 /* exceptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = exceptions.h; path = ../tnl2/exceptions.h; sourceTree = SOURCE_ROOT; };
+		1D3822611153D0CD009D94C5 /* ghost_connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ghost_connection.h; path = ../tnl2/ghost_connection.h; sourceTree = SOURCE_ROOT; };
+		1D3822621153D0CD009D94C5 /* net_connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = net_connection.h; path = ../tnl2/net_connection.h; sourceTree = SOURCE_ROOT; };
+		1D3822631153D0CD009D94C5 /* net_interface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = net_interface.h; path = ../tnl2/net_interface.h; sourceTree = SOURCE_ROOT; };
+		1D3822641153D0CD009D94C5 /* net_object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = net_object.h; path = ../tnl2/net_object.h; sourceTree = SOURCE_ROOT; };
+		1D3822651153D0CD009D94C5 /* tnl2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tnl2.h; path = ../tnl2/tnl2.h; sourceTree = SOURCE_ROOT; };
+		1D3822711153D270009D94C5 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = ../../../../../../System/Library/Frameworks/OpenGL.framework; sourceTree = SOURCE_ROOT; };
+		1D3822731153D280009D94C5 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
+		1D3822781153D2A1009D94C5 /* libtomcrypt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libtomcrypt.a; path = ../../torque_sockets/lib/libtomcrypt/libtomcrypt.a; sourceTree = SOURCE_ROOT; };
+		1D38227A1153D2B5009D94C5 /* libtommath.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libtommath.a; path = ../../torque_sockets/lib/libtommath/libtommath.a; sourceTree = SOURCE_ROOT; };
+		1D38228C1153D404009D94C5 /* tnl2_test_view.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnl2_test_view.h; sourceTree = "<group>"; };
+		1D38228D1153D404009D94C5 /* tnl2_test_view.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = tnl2_test_view.m; sourceTree = "<group>"; };
+		1DDD58150DA1D0A300B32029 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
+		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
+		32CA4F630368D1EE00C91783 /* tnl2_test_cocoa_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnl2_test_cocoa_Prefix.pch; sourceTree = "<group>"; };
+		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8D1107320486CEB800E47090 /* tnl2_test_cocoa.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = tnl2_test_cocoa.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8D11072E0486CEB800E47090 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
+				1D3822721153D270009D94C5 /* OpenGL.framework in Frameworks */,
+				1D3822741153D280009D94C5 /* CoreServices.framework in Frameworks */,
+				1D3822791153D2A1009D94C5 /* libtomcrypt.a in Frameworks */,
+				1D38227B1153D2B5009D94C5 /* libtommath.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		080E96DDFE201D6D7F000001 /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				1D38228C1153D404009D94C5 /* tnl2_test_view.h */,
+				1D38228D1153D404009D94C5 /* tnl2_test_view.m */,
+			);
+			name = Classes;
+			sourceTree = "<group>";
+		};
+		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
+			);
+			name = "Linked Frameworks";
+			sourceTree = "<group>";
+		};
+		1058C7A2FEA54F0111CA2CBB /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				29B97324FDCFA39411CA2CEA /* AppKit.framework */,
+				13E42FB307B3F0F600E4EEF1 /* CoreData.framework */,
+				29B97325FDCFA39411CA2CEA /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		19C28FACFE9D520D11CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8D1107320486CEB800E47090 /* tnl2_test_cocoa.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1D3822211153D07C009D94C5 /* core */ = {
+			isa = PBXGroup;
+			children = (
+				1D3822241153D0A7009D94C5 /* algorithm_templates.h */,
+				1D3822251153D0A7009D94C5 /* array.h */,
+				1D3822261153D0A7009D94C5 /* assert.h */,
+				1D3822271153D0A7009D94C5 /* base_type_declarations.h */,
+				1D3822281153D0A7009D94C5 /* base_type_io.h */,
+				1D3822291153D0A7009D94C5 /* base_type_traits.h */,
+				1D38222A1153D0A7009D94C5 /* base_types.h */,
+				1D38222B1153D0A7009D94C5 /* bit_stream.h */,
+				1D38222C1153D0A7009D94C5 /* byte_buffer.h */,
+				1D38222D1153D0A7009D94C5 /* byte_stream_fixed.h */,
+				1D38222E1153D0A7009D94C5 /* construct.h */,
+				1D38222F1153D0A7009D94C5 /* context.h */,
+				1D3822301153D0A7009D94C5 /* core.h */,
+				1D3822311153D0A7009D94C5 /* cpu_endian.h */,
+				1D3822321153D0A7009D94C5 /* dictionary.h */,
+				1D3822331153D0A7009D94C5 /* formatted_string_buffer.h */,
+				1D3822341153D0A7009D94C5 /* function_record.h */,
+				1D3822351153D0A7009D94C5 /* functor.h */,
+				1D3822361153D0A7009D94C5 /* hash.h */,
+				1D3822371153D0A7009D94C5 /* hash_table_array.h */,
+				1D3822381153D0A7009D94C5 /* hash_table_flat.h */,
+				1D3822391153D0A7009D94C5 /* indexed_string.h */,
+				1D38223A1153D0A7009D94C5 /* log.h */,
+				1D38223B1153D0A7009D94C5 /* memory_functions.h */,
+				1D38223C1153D0A7009D94C5 /* page_allocator.h */,
+				1D38223D1153D0A7009D94C5 /* platform.h */,
+				1D38223E1153D0A7009D94C5 /* power_two_functions.h */,
+				1D38223F1153D0A7009D94C5 /* ref_object.h */,
+				1D3822401153D0A7009D94C5 /* small_block_allocator.h */,
+				1D3822411153D0A7009D94C5 /* static_to_indexed_string_map.h */,
+				1D3822421153D0A7009D94C5 /* string.h */,
+				1D3822431153D0A7009D94C5 /* system_includes_linux.h */,
+				1D3822441153D0A7009D94C5 /* system_includes_mac_osx.h */,
+				1D3822451153D0A7009D94C5 /* system_includes_win32.h */,
+				1D3822461153D0A7009D94C5 /* thread.h */,
+				1D3822471153D0A7009D94C5 /* thread_queue.h */,
+				1D3822481153D0A7009D94C5 /* type_database.h */,
+				1D3822491153D0A7009D94C5 /* type_record.h */,
+				1D38224A1153D0A7009D94C5 /* utils.h */,
+				1D38224B1153D0A7009D94C5 /* zone_allocator.h */,
+			);
+			name = core;
+			sourceTree = "<group>";
+		};
+		1D3822221153D082009D94C5 /* torque_sockets */ = {
+			isa = PBXGroup;
+			children = (
+				1D38224C1153D0BE009D94C5 /* address.h */,
+				1D38224D1153D0BE009D94C5 /* asymmetric_key.h */,
+				1D38224E1153D0BE009D94C5 /* buffer_utils.h */,
+				1D38224F1153D0BE009D94C5 /* client_puzzle.h */,
+				1D3822501153D0BE009D94C5 /* nonce.h */,
+				1D3822511153D0BE009D94C5 /* old_arranged_connection_logic.h */,
+				1D3822521153D0BE009D94C5 /* packet_stream.h */,
+				1D3822531153D0BE009D94C5 /* pending_connection.h */,
+				1D3822541153D0BE009D94C5 /* random_generator.h */,
+				1D3822551153D0BE009D94C5 /* scratch_pad.h */,
+				1D3822561153D0BE009D94C5 /* sockets.h */,
+				1D3822571153D0BE009D94C5 /* symmetric_cipher.h */,
+				1D3822581153D0BE009D94C5 /* time.h */,
+				1D3822591153D0BE009D94C5 /* torque_connection.h */,
+				1D38225A1153D0BE009D94C5 /* torque_socket.h */,
+				1D38225B1153D0BE009D94C5 /* torque_sockets.h */,
+				1D38225C1153D0BE009D94C5 /* torque_sockets_c_api.h */,
+				1D38225D1153D0BE009D94C5 /* torque_sockets_c_implementation.h */,
+				1D38225E1153D0BE009D94C5 /* udp_socket.h */,
+			);
+			name = torque_sockets;
+			sourceTree = "<group>";
+		};
+		1D3822231153D08A009D94C5 /* tnl2 */ = {
+			isa = PBXGroup;
+			children = (
+				1D38225F1153D0CD009D94C5 /* event_connection.h */,
+				1D3822601153D0CD009D94C5 /* exceptions.h */,
+				1D3822611153D0CD009D94C5 /* ghost_connection.h */,
+				1D3822621153D0CD009D94C5 /* net_connection.h */,
+				1D3822631153D0CD009D94C5 /* net_interface.h */,
+				1D3822641153D0CD009D94C5 /* net_object.h */,
+				1D3822651153D0CD009D94C5 /* tnl2.h */,
+			);
+			name = tnl2;
+			sourceTree = "<group>";
+		};
+		29B97314FDCFA39411CA2CEA /* tnl2_test_cocoa */ = {
+			isa = PBXGroup;
+			children = (
+				1D38227A1153D2B5009D94C5 /* libtommath.a */,
+				1D3822781153D2A1009D94C5 /* libtomcrypt.a */,
+				1D3822731153D280009D94C5 /* CoreServices.framework */,
+				1D3822711153D270009D94C5 /* OpenGL.framework */,
+				1D3822231153D08A009D94C5 /* tnl2 */,
+				1D3822221153D082009D94C5 /* torque_sockets */,
+				1D3822211153D07C009D94C5 /* core */,
+				080E96DDFE201D6D7F000001 /* Classes */,
+				29B97315FDCFA39411CA2CEA /* Other Sources */,
+				29B97317FDCFA39411CA2CEA /* Resources */,
+				29B97323FDCFA39411CA2CEA /* Frameworks */,
+				19C28FACFE9D520D11CA2CBB /* Products */,
+			);
+			name = tnl2_test_cocoa;
+			sourceTree = "<group>";
+		};
+		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
+			isa = PBXGroup;
+			children = (
+				1D38221A1153D076009D94C5 /* test_building.h */,
+				1D38221B1153D076009D94C5 /* test_connection.h */,
+				1D38221C1153D076009D94C5 /* test_game.cpp */,
+				1D38221D1153D076009D94C5 /* test_game.h */,
+				1D38221E1153D076009D94C5 /* test_net_interface.h */,
+				1D38221F1153D076009D94C5 /* test_player.h */,
+				32CA4F630368D1EE00C91783 /* tnl2_test_cocoa_Prefix.pch */,
+				29B97316FDCFA39411CA2CEA /* main.m */,
+			);
+			name = "Other Sources";
+			sourceTree = "<group>";
+		};
+		29B97317FDCFA39411CA2CEA /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				8D1107310486CEB800E47090 /* Info.plist */,
+				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
+				1DDD58140DA1D0A300B32029 /* MainMenu.xib */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */,
+				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8D1107260486CEB800E47090 /* tnl2_test_cocoa */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C01FCF4A08A954540054247B /* Build configuration list for PBXNativeTarget "tnl2_test_cocoa" */;
+			buildPhases = (
+				8D1107290486CEB800E47090 /* Resources */,
+				8D11072C0486CEB800E47090 /* Sources */,
+				8D11072E0486CEB800E47090 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = tnl2_test_cocoa;
+			productInstallPath = "$(HOME)/Applications";
+			productName = tnl2_test_cocoa;
+			productReference = 8D1107320486CEB800E47090 /* tnl2_test_cocoa.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		29B97313FDCFA39411CA2CEA /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "tnl2_test_cocoa" */;
+			compatibilityVersion = "Xcode 3.1";
+			hasScannedForEncodings = 1;
+			mainGroup = 29B97314FDCFA39411CA2CEA /* tnl2_test_cocoa */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				8D1107260486CEB800E47090 /* tnl2_test_cocoa */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		8D1107290486CEB800E47090 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
+				1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8D11072C0486CEB800E47090 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8D11072D0486CEB800E47090 /* main.m in Sources */,
+				1D3822201153D076009D94C5 /* test_game.cpp in Sources */,
+				1D38228E1153D404009D94C5 /* tnl2_test_view.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		089C165CFE840E0CC02AAC07 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				089C165DFE840E0CC02AAC07 /* English */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		1DDD58140DA1D0A300B32029 /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				1DDD58150DA1D0A300B32029 /* English */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		C01FCF4B08A954540054247B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DEBUGGING_SYMBOLS = full;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = tnl2_test_cocoa_Prefix.pch;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (
+					../../torque_sockets/lib/libtomcrypt/src/headers/,
+					../tnl2,
+					../../torque_sockets,
+				);
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../torque_sockets/lib/libtomcrypt\"",
+					"\"$(SRCROOT)/../../torque_sockets/lib/libtommath\"",
+				);
+				OTHER_CFLAGS = "-fno-default-inline";
+				PRODUCT_NAME = tnl2_test_cocoa;
+			};
+			name = Debug;
+		};
+		C01FCF4C08A954540054247B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_DEBUGGING_SYMBOLS = full;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = tnl2_test_cocoa_Prefix.pch;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (
+					../../torque_sockets/lib/libtomcrypt/src/headers/,
+					../tnl2,
+					../../torque_sockets,
+				);
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../torque_sockets/lib/libtomcrypt\"",
+					"\"$(SRCROOT)/../../torque_sockets/lib/libtommath\"",
+				);
+				OTHER_CFLAGS = "-fno-default-inline";
+				PRODUCT_NAME = tnl2_test_cocoa;
+			};
+			name = Release;
+		};
+		C01FCF4F08A954540054247B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PREBINDING = NO;
+				SDKROOT = macosx10.5;
+			};
+			name = Debug;
+		};
+		C01FCF5008A954540054247B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				PREBINDING = NO;
+				SDKROOT = macosx10.5;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		C01FCF4A08A954540054247B /* Build configuration list for PBXNativeTarget "tnl2_test_cocoa" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C01FCF4B08A954540054247B /* Debug */,
+				C01FCF4C08A954540054247B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "tnl2_test_cocoa" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C01FCF4F08A954540054247B /* Debug */,
+				C01FCF5008A954540054247B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 29B97313FDCFA39411CA2CEA /* Project object */;
+}
