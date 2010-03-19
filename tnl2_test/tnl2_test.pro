@@ -64,7 +64,6 @@ HEADERS += tnl2_test_widget.h \
     ../../torque_sockets/core/algorithm_templates.h \
     ../../torque_sockets/torque_sockets/udp_socket.h \
     ../../torque_sockets/torque_sockets/torque_sockets.h \
-    ../../torque_sockets/torque_sockets/torque_socket_event.h \
     ../../torque_sockets/torque_sockets/torque_socket.h \
     ../../torque_sockets/torque_sockets/torque_connection.h \
     ../../torque_sockets/torque_sockets/time.h \
@@ -77,7 +76,10 @@ HEADERS += tnl2_test_widget.h \
     ../../torque_sockets/torque_sockets/buffer_utils.h \
     ../../torque_sockets/torque_sockets/asymmetric_key.h \
     ../../torque_sockets/torque_sockets/address.h \
-    ../../torque_sockets/torque_sockets/pending_connection.h
+    ../../torque_sockets/torque_sockets/pending_connection.h \
+    ../../torque_sockets/torque_sockets/torque_sockets_c_api.h \
+    ../../torque_sockets/torque_sockets_reference_api.h \
+    ../../torque_sockets/torque_sockets/torque_sockets_c_implementation.h
 FORMS += 
 INCLUDEPATH += ../tnl2 \
     ../../torque_sockets/ \

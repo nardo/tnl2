@@ -8,7 +8,7 @@
 
 #include "tomcrypt.h"
 #include "core/platform.h"
-#include "torque_sockets/torque_socket_event.h"
+#include "torque_sockets/torque_sockets_c_api.h"
 
 namespace core
 {
@@ -45,7 +45,7 @@ namespace core
 	};
 };
 
-//#include "torque_sockets_implementation.h"
+#include "torque_sockets/torque_sockets_c_implementation.h"
 
 namespace core
 {

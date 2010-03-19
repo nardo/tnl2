@@ -206,7 +206,7 @@ public:
 		TorqueLogMessageFormatted(LogNetConnection, ("connection %d: END - %llu bits", _connection, stream.get_bit_position() - start) );
 		logprintf("NC packet write data: %s", buffer_encode_base_16(stream.get_buffer(), stream.get_next_byte_position())->get_buffer());
 
-		_interface->get_socket().send_to_connection(_connection, stream, &_last_send_sequence);
+		torque_socket_send_to_connection(_interface->get_socket(), _connection, stream.get_next_byte_position(), stream.get_buffer(), &_last_send_sequence);
 		//torque_connection_send_to(_connection, stream.get_next_byte_position(), stream.get_buffer(), &_last_send_sequence);
 		_notify_queue_tail->sequence = _last_send_sequence;
 	}

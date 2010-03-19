@@ -46,8 +46,7 @@ public:
 			logprintf("%s - received ping.", from_string.c_str());
 			// we're a server, and we got a ping packet from a client, so send back a GamePingResponse to let the client know it has found a server.
 			core::write(write_stream, uint8(GamePingResponse));
-			_socket.send_to(from, write_stream);
-			//torque_socket_send_to(_socket, &event->source_address, write_stream.get_next_byte_position(), write_stream.get_buffer());
+			torque_socket_send_to(_socket, &event->source_address, write_stream.get_byte_position(), write_stream.get_buffer());
 			
 			logprintf("%s - sending ping response.", from_string.c_str());
 		}
@@ -72,9 +71,7 @@ public:
 		packet_stream write_stream;
 		
 		core::write(write_stream, uint8(GamePingRequest));
-		address ping_addr(_ping_address);
-		_socket.send_to(ping_addr, write_stream);
-		//torque_socket_send_to(_socket, &_ping_address, write_stream.get_next_byte_position(), write_stream.get_buffer());
+		torque_socket_send_to(_socket, &_ping_address, write_stream.get_next_byte_position(), write_stream.get_buffer());
 
 		string ping_address_string = address(_ping_address).to_string();
 		logprintf("%s - sending ping.", ping_address_string.c_str());
