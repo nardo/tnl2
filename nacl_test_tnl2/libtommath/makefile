@@ -1,11 +1,17 @@
 #Makefile for GCC
 #
 #Tom St Denis
+#
+# Modified by Mark Frohnmayer to work with Native Client
 
 #version of library 
 VERSION=0.42
 
-CFLAGS  +=  -arch i386 -I./ -Wall -W -Wshadow -Wsign-compare
+CC=/Users/markf/Work/gg/nativeclient/native_client/src/third_party/nacl_sdk/mac/sdk/nacl-sdk/bin/nacl-gcc
+AR=/Users/markf/Work/gg/nativeclient/native_client/src/third_party/nacl_sdk/mac/sdk/nacl-sdk/bin/nacl-ar -r
+RANLIB=/Users/markf/Work/gg/nativeclient/native_client/src/third_party/nacl_sdk/mac/sdk/nacl-sdk/bin/nacl-ranlib
+
+CFLAGS  += -I./ -Wall -W -Wshadow -Wsign-compare
 
 ifndef MAKE
    MAKE=make
@@ -86,8 +92,8 @@ bn_mp_init_set_int.o bn_mp_invmod_slow.o bn_mp_prime_rabin_miller_trials.o \
 bn_mp_to_signed_bin_n.o bn_mp_to_unsigned_bin_n.o
 
 $(LIBNAME):  $(OBJECTS)
-	$(AR) $(ARFLAGS) $@ $(OBJECTS)
-	ranlib $@
+	$(AR) $@ $(OBJECTS)
+	$(RANLIB) $@
 
 #make a profiled library (takes a while!!!)
 #
@@ -110,7 +116,7 @@ profiled_single:
 	rm -f *.o ltmtest
 	$(CC) $(CFLAGS) -fbranch-probabilities -DTESTING -c mpi.c -o mpi.o
 	$(AR) $(ARFLAGS) $(LIBNAME) mpi.o
-	ranlib $(LIBNAME)	
+	$(RANLIB) $(LIBNAME)	
 
 install: $(LIBNAME)
 	install -d -g $(GROUP) -o $(USER) $(DESTDIR)$(LIBPATH)
