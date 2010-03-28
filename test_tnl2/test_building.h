@@ -1,16 +1,11 @@
-/// The building class is an example of a NetObject that is ScopeAlways.
-/// ScopeAlways objects are transmitted to all clients that are currently
-/// ghosting, regardless of whether or not the scope object calls GhostConnection::objectInScope
-/// for them or not.  The "buildings" are represented by red rectangles on the
-/// playing field, and are constructed with random position and extents.
+/// The building class is an example of a net_object that is always scoped by the scoping class (player).  Objects that are for the most part static and generally relevant to the client are often worth always scoping, so the hit of transferring the basic state of the object is only felt once.  The "buildings" are represented by red rectangles on the playing field, and are constructed with random position and extents.
 class building : public net_object
 {
 	typedef net_object parent;
 public:
 	declare_dynamic_class()
 
-	/// Mask bits used to determine what states are out of date for this
-	/// object and what then represent.
+	/// Mask bits used to determine what states are out of date for this object and what then represent.
 	enum {
 		initial_state = 1, ///< building's only mask bit is the initial mask, as no other states are ever set.
 	};
@@ -59,20 +54,17 @@ public:
 		}   
 	}
 	
-	/// Called on the client when this building object has been ghosted to the
-	/// client and its first unpackUpdate has been called.  on_ghost_add adds
-	/// the building to the client _game.
+	/// Called on the client when this building object has been ghosted to the client and its first unpackUpdate has been called.  on_ghost_add adds the building to the client _game.
 	bool on_ghost_add(ghost_connection *the_connection)
 	{
 		add_to_game(((test_net_interface *) the_connection->get_interface())->_game);
 		return true;
 	}
 	
-	/// add_to_game is a helper function called by on_ghost_add and on the server
-	/// to add the building to the specified _game.
+	/// add_to_game is a helper function called by on_ghost_add and on the server to add the building to the specified _game.
 	void add_to_game(test_game *the_game)
 	{
-		// add it to the list of buildings in the _game
+		// add it to the list of buildings in the game
 		the_game->_buildings.push_back(this);
 		_game = the_game;
 	}

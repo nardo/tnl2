@@ -1,0 +1,8 @@
+A demo for tnl2 running in a Native Client + TorqueSocket enabled browser.
+
+From this directory run:
+
+make
+
+Once the demo is built, point your browser (with the Native
+Client and TorqueSocket plugins installed) to the nacl_test_tnl2.html file in this directory. This html file will run the demo embedded in a web page.

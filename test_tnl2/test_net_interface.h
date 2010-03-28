@@ -37,7 +37,7 @@ public:
 	void _process_socket_packet(torque_socket_event *event)
 	{
 		net::packet_stream write_stream;
-		uint8 packet_type = event->data[0];
+		core::uint8 packet_type = event->data[0];
 		net::address from(event->source_address);
 		string from_string = from.to_string();
 		logprintf("%s - received socket packet, packet_type == %d.", from_string.c_str(), packet_type);
@@ -45,7 +45,7 @@ public:
 		{
 			logprintf("%s - received ping.", from_string.c_str());
 			// we're a server, and we got a ping packet from a client, so send back a GamePingResponse to let the client know it has found a server.
-			core::write(write_stream, uint8(GamePingResponse));
+			core::write(write_stream, core::uint8(GamePingResponse));
 			torque_socket_send_to(_socket, &event->source_address, write_stream.get_byte_position(), write_stream.get_buffer());
 			
 			logprintf("%s - sending ping response.", from_string.c_str());
@@ -70,7 +70,7 @@ public:
 	{
 		net::packet_stream write_stream;
 		
-		core::write(write_stream, uint8(GamePingRequest));
+		core::write(write_stream, core::uint8(GamePingRequest));
 		torque_socket_send_to(_socket, &_ping_address, write_stream.get_next_byte_position(), write_stream.get_buffer());
 
 		string ping_address_string = net::address(_ping_address).to_string();

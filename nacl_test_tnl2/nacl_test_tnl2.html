@@ -1,0 +1,61 @@
+<HTML>
+<HEAD>
+<TITLE>Torque Network Library 2.0 Test in Native Client</TITLE>
+
+<script type="text/javascript">
+
+var nacl_elt;
+
+// Before scripting the loaded module, ensure the Native Client module is loaded.
+var startupTimeout;
+
+var PostLoadInit = function() {
+  if (nacl_elt.__moduleReady == 1) {
+    clearTimeout(startupTimeout);
+    nacl_elt.focus();
+  } else {
+    if (nacl_elt.__moduleReady == undefined) {
+      alert('The Native Client plugin was unable to load');
+      return;
+    }
+    startupTimeout = setTimeout(PostLoadInit, 100);
+  }
+}
+
+// Init is called when the document has completed loading.  It downloads the
+// NativeClient modules.
+var Init = function() {
+  // service_url contains the location of the NativeClient module to be
+  // loaded as a service.
+  nacl_elt = document.getElementById('embed1');
+  PostLoadInit();
+}
+
+
+</script>
+
+</HEAD>
+<BODY id="bodyId" onload="Init();" >
+
+<h1>test_tnl2 embedded in a web page</h1>
+ <p>
+  You should see a yellow box below, representing the game world.  Red rectangles represent buildings in 
+  the sample game world and the small blue squares represent players.  The demo starts in client mode and will
+  attempt to connect to a local server.
+ </p>
+ <p>
+  This demo uses the open source Torque Network Library, which
+  provides high performance real-time networking for games and simulations.  Please see
+  <a href="http://www.libtnl.com/">http://www.libtnl.com/</a>
+  for more information about the Torque Network Library.
+ </p>
+<embed id="embed1" src="nacl_test_tnl2.nexe" type="application/x-nacl-srpc" width=512 height=512>
+<br>
+
+<script>
+var embed1 = document.getElementById('embed1');
+</script>
+
+
+</BODY>
+</HTML>

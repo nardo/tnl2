@@ -11,7 +11,7 @@ public:
 
 	void rpc_set_control_object(enumeration<ghost_connection::max_ghost_count> player_id)
 	{
-		logprintf("My player = %d", uint32(player_id));
+		logprintf("My player = %d", core::uint32(player_id));
 		net_object *the_object = resolve_ghost(player_id);
 		if(the_object)
 		{

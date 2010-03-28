@@ -12,33 +12,7 @@
 
 namespace core
 {
-#include "core/core.h"
-	uint32 hash_buffer(const void *buffer, uint32 len)
-	{
-		uint8 *buf = (uint8 *) buffer;
-		uint32 result = 0;
-		while(len--)
-			result = ((result << 8) | (result >> 24)) ^ uint32(*buf++);
-		return result;
-	}
-	int _log_index = 0;
-
-	void logprintf(const char *format, ...)
-	{
-		char buffer[4096];
-		uint32 bufferStart = 0;
-		va_list s;
-		va_start( s, format );
-		int32 len = vsnprintf(buffer + bufferStart, sizeof(buffer) - bufferStart, format, s);
-		printf("LOG %d: %s\n", _log_index, buffer);
-		va_end(s);
-		fflush(stdout);
-	}
-		
-	template <typename signature> uint32 hash_method(signature the_method)
-	{
-		return hash_buffer((void *) &the_method, sizeof(the_method));
-	}
+	#include "core/core.h"
 	struct net {
 		#include "torque_sockets/torque_sockets.h"
 	};
@@ -51,23 +25,25 @@ namespace core
 	struct tnl {
 		#include "tnl2.h"
 	};
-
-	struct tnl_test : tnl
-	{
-		struct position {
-			unit_float<12> x, y;
-		};
-		#include "test_player.h"
-		#include "test_building.h"
-		#include "test_connection.h"
-		#include "test_game.h"
-		#include "test_net_interface.h"
-	};
-
-	tnl_test::test_game *game[2] = { 0, 0 };
 };
 
+
 using namespace core;
+
+struct tnl_test : tnl
+{
+	struct position {
+		unit_float<12> x, y;
+	};
+	#include "test_player.h"
+	#include "test_building.h"
+	#include "test_connection.h"
+	#include "test_game.h"
+	#include "test_net_interface.h"
+};
+
+tnl_test::test_game *game[2] = { 0, 0 };
+
 
 void restart_games(bool game_1_is_server, bool game_2_is_server)
 {

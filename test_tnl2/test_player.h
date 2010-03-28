@@ -116,7 +116,7 @@ public:
 		// // call a quick RPC to all the connections that have this object in scope
 		//rpcPlayerDidMove(end_pos.x, end_pos.y);
 	}
-	void on_ghost_update(uint32 mask_bits)
+	void on_ghost_update(core::uint32 mask_bits)
 	{
 		logprintf("Got ghost update (%g, %g)->(%g, %g), %g, %g", float(_start_pos.x), float(_start_pos.y), float(_end_pos.x), float(_end_pos.y), _t, _t_delta);
 		update(0, 0);

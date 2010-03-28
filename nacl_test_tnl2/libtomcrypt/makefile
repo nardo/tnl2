@@ -2,9 +2,14 @@
 #
 # Tom St Denis
 # Modified by Clay Culver
+# Modified by Mark Frohnmayer to work with Native Client
 
 # The version
 VERSION=1.17
+
+CC=/Users/markf/Work/gg/nativeclient/native_client/src/third_party/nacl_sdk/mac/sdk/nacl-sdk/bin/nacl-gcc
+AR=/Users/markf/Work/gg/nativeclient/native_client/src/third_party/nacl_sdk/mac/sdk/nacl-sdk/bin/nacl-ar -r
+RANLIB=/Users/markf/Work/gg/nativeclient/native_client/src/third_party/nacl_sdk/mac/sdk/nacl-sdk/bin/nacl-ranlib
 
 PLATFORM := $(shell uname | sed -e 's/_.*//')
 
@@ -30,7 +35,7 @@ endif
 endif
 
 # Compilation flags. Note the += does not write over the user's CFLAGS!
-CFLAGS += -arch i386 -c -I../libtommath -I./testprof/ -I./src/headers/ -Wall -Wsign-compare -W -Wshadow -Wno-unused-parameter -DLTC_SOURCE
+CFLAGS += -c -I../libtommath -I./testprof/ -I./src/headers/ -Wall -Wsign-compare -W -Wshadow -Wno-unused-parameter -DLTC_SOURCE
 
 # additional warnings (newer GCC 3.4 and higher)
 ifdef GCC_34
@@ -265,7 +270,7 @@ testprof/$(LIBTEST):
 	cd testprof ; CFLAGS="$(CFLAGS)" LIBTEST_S=$(LIBTEST_S) $(MAKE) 
 
 $(LIBNAME): $(OBJECTS)
-	$(AR) $(ARFLAGS) $@ $(OBJECTS) 
+	$(AR) $@ $(OBJECTS) 
 	$(RANLIB) $@
 
 #This rule makes the hash program included with libtomcrypt

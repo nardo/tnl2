@@ -95,7 +95,7 @@
 		1D3822631153D0CD009D94C5 /* net_interface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = net_interface.h; path = ../tnl2/net_interface.h; sourceTree = SOURCE_ROOT; };
 		1D3822641153D0CD009D94C5 /* net_object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = net_object.h; path = ../tnl2/net_object.h; sourceTree = SOURCE_ROOT; };
 		1D3822651153D0CD009D94C5 /* tnl2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tnl2.h; path = ../tnl2/tnl2.h; sourceTree = SOURCE_ROOT; };
-		1D3822711153D270009D94C5 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = ../../../../../../System/Library/Frameworks/OpenGL.framework; sourceTree = SOURCE_ROOT; };
+		1D3822711153D270009D94C5 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
 		1D3822731153D280009D94C5 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
 		1D3822781153D2A1009D94C5 /* libtomcrypt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libtomcrypt.a; path = ../../torque_sockets/lib/libtomcrypt/libtomcrypt.a; sourceTree = SOURCE_ROOT; };
 		1D38227A1153D2B5009D94C5 /* libtommath.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libtommath.a; path = ../../torque_sockets/lib/libtommath/libtommath.a; sourceTree = SOURCE_ROOT; };
@@ -126,13 +126,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		080E96DDFE201D6D7F000001 /* Classes */ = {
+		080E96DDFE201D6D7F000001 /* Cocoa stub program */ = {
 			isa = PBXGroup;
 			children = (
+				32CA4F630368D1EE00C91783 /* tnl2_test_cocoa_Prefix.pch */,
+				29B97316FDCFA39411CA2CEA /* main.m */,
 				1D38228C1153D404009D94C5 /* tnl2_test_view.h */,
 				1D38228D1153D404009D94C5 /* tnl2_test_view.m */,
 			);
-			name = Classes;
+			name = "Cocoa stub program";
 			sourceTree = "<group>";
 		};
 		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
@@ -253,13 +255,11 @@
 			children = (
 				1D38227A1153D2B5009D94C5 /* libtommath.a */,
 				1D3822781153D2A1009D94C5 /* libtomcrypt.a */,
-				1D3822731153D280009D94C5 /* CoreServices.framework */,
-				1D3822711153D270009D94C5 /* OpenGL.framework */,
-				1D3822231153D08A009D94C5 /* tnl2 */,
-				1D3822221153D082009D94C5 /* torque_sockets */,
 				1D3822211153D07C009D94C5 /* core */,
-				080E96DDFE201D6D7F000001 /* Classes */,
-				29B97315FDCFA39411CA2CEA /* Other Sources */,
+				1D3822221153D082009D94C5 /* torque_sockets */,
+				1D3822231153D08A009D94C5 /* tnl2 */,
+				29B97315FDCFA39411CA2CEA /* tnl2_test */,
+				080E96DDFE201D6D7F000001 /* Cocoa stub program */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
@@ -267,19 +267,17 @@
 			name = tnl2_test_cocoa;
 			sourceTree = "<group>";
 		};
-		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
+		29B97315FDCFA39411CA2CEA /* tnl2_test */ = {
 			isa = PBXGroup;
 			children = (
 				1D38221A1153D076009D94C5 /* test_building.h */,
 				1D38221B1153D076009D94C5 /* test_connection.h */,
-				1D38221C1153D076009D94C5 /* test_game.cpp */,
 				1D38221D1153D076009D94C5 /* test_game.h */,
 				1D38221E1153D076009D94C5 /* test_net_interface.h */,
 				1D38221F1153D076009D94C5 /* test_player.h */,
-				32CA4F630368D1EE00C91783 /* tnl2_test_cocoa_Prefix.pch */,
-				29B97316FDCFA39411CA2CEA /* main.m */,
+				1D38221C1153D076009D94C5 /* test_game.cpp */,
 			);
-			name = "Other Sources";
+			name = tnl2_test;
 			sourceTree = "<group>";
 		};
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
@@ -295,6 +293,8 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				1D3822711153D270009D94C5 /* OpenGL.framework */,
+				1D3822731153D280009D94C5 /* CoreServices.framework */,
 				1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */,
 				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
 			);
