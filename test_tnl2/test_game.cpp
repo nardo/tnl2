@@ -1,46 +1,7 @@
-#include <OpenGL/gl.h>
-#include <math.h>
-#include <stdio.h>
-
-#include <iostream>
-
 // Copyright GarageGames.  See /license/info.txt in this distribution for licensing terms.
 
-#include "tomcrypt.h"
-#include "core/platform.h"
-#include "torque_sockets/torque_sockets_c_api.h"
-
-namespace core
-{
-	#include "core/core.h"
-	struct net {
-		#include "torque_sockets/torque_sockets.h"
-	};
-};
-
-#include "torque_sockets/torque_sockets_c_implementation.h"
-
-namespace core
-{
-	struct tnl {
-		#include "tnl2.h"
-	};
-};
-
-
-using namespace core;
-
-struct tnl_test : tnl
-{
-	struct position {
-		unit_float<12> x, y;
-	};
-	#include "test_player.h"
-	#include "test_building.h"
-	#include "test_connection.h"
-	#include "test_game.h"
-	#include "test_net_interface.h"
-};
+#include <OpenGL/gl.h>
+#include "test_tnl2.h"
 
 tnl_test::test_game *game[2] = { 0, 0 };
 
@@ -99,7 +60,7 @@ void tick_games()
 void render_game_scene(int game_index)
 {
 	if(game[game_index])
-		game[game_index]->render_frame();
+		tnl_test::test_game_render_frame_open_gl(game[game_index]);
 }
 
 extern "C"
@@ -140,6 +101,6 @@ extern "C"
 	}
 	void render_game_scene(void *the_game, unsigned width, unsigned height)
 	{
-		((tnl_test::test_game *) the_game)->render_frame();
+		tnl_test::test_game_render_frame_open_gl((tnl_test::test_game *) the_game);
 	}
 }

@@ -4,36 +4,7 @@
 #include <nacl/nacl_av.h>
 #include <nacl/nacl_srpc.h>
 
-#include <math.h>
-#include <stdio.h>
-
-#include <iostream>
-
-// Copyright GarageGames.  See /license/info.txt in this distribution for licensing terms.
-
-#include "tomcrypt.h"
-#include "core/platform.h"
-#include "torque_sockets/torque_sockets_c_api.h"
-
-namespace core
-{
-#include "core/core.h"
-	struct net {
-#include "torque_sockets/torque_sockets.h"
-	};
-};
-
-#include "torque_sockets/torque_sockets_c_implementation.h"
-
-namespace core
-{
-	struct tnl {
-#include "tnl2.h"
-	};
-};
-
-
-
+#include "test_tnl2.h"
 
 // global properties used to setup demo
 static const int kMaxWindow = 4096;
