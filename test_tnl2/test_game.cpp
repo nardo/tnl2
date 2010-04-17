@@ -47,10 +47,10 @@ void click_game(int game_index, float x, float y)
 
 void tick_games()
 {
-	core::_log_index = 0;
+	core::_log_prefix = "Game0";
 	if(game[0])
 		game[0]->tick();
-	core::_log_index = 1;
+	core::_log_prefix = "Game1";
 	if(game[1])
 		game[1]->tick();
 }
@@ -96,7 +96,8 @@ extern "C"
 	}
 	void tick_game(void *the_game, unsigned index)
 	{
-		core::_log_index = index;
+		const char *prefixes[] = { "Game 1", "Game 2", "Game 3", };
+		core::_log_prefix = index < 3 ? prefixes[index] : "";
 		((tnl_test::test_game *) the_game)->tick();
 	}
 	void render_game_scene(void *the_game, unsigned width, unsigned height)

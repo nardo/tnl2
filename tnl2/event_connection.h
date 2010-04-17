@@ -23,26 +23,6 @@ class event_connection : public net_connection
 public:
 	typedef net_connection parent;
 protected:
-	class functor_creator
-	{
-	public:
-		virtual functor *create() = 0;
-		virtual ~functor_creator() {}
-	};
-	
-	template<typename signature> class functor_creator_decl : public functor_creator
-	{
-		signature f;
-	public:
-		functor_creator_decl(signature sig)
-		{
-			f = sig;
-		}
-		functor *create()
-		{
-			return new functor_decl<signature>(f);
-		}
-	};
 	struct rpc_record
 	{
 		uint32 method_hash;

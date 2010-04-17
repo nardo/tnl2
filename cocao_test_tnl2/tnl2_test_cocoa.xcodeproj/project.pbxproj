@@ -72,7 +72,6 @@
 		1D3822521153D0BE009D94C5 /* packet_stream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = packet_stream.h; path = ../../torque_sockets/torque_sockets/packet_stream.h; sourceTree = SOURCE_ROOT; };
 		1D3822531153D0BE009D94C5 /* pending_connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pending_connection.h; path = ../../torque_sockets/torque_sockets/pending_connection.h; sourceTree = SOURCE_ROOT; };
 		1D3822541153D0BE009D94C5 /* random_generator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = random_generator.h; path = ../../torque_sockets/torque_sockets/random_generator.h; sourceTree = SOURCE_ROOT; };
-		1D3822551153D0BE009D94C5 /* scratch_pad.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = scratch_pad.h; path = ../../torque_sockets/torque_sockets/scratch_pad.h; sourceTree = SOURCE_ROOT; };
 		1D3822561153D0BE009D94C5 /* sockets.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sockets.h; path = ../../torque_sockets/torque_sockets/sockets.h; sourceTree = SOURCE_ROOT; };
 		1D3822571153D0BE009D94C5 /* symmetric_cipher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = symmetric_cipher.h; path = ../../torque_sockets/torque_sockets/symmetric_cipher.h; sourceTree = SOURCE_ROOT; };
 		1D3822581153D0BE009D94C5 /* time.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = time.h; path = ../../torque_sockets/torque_sockets/time.h; sourceTree = SOURCE_ROOT; };
@@ -223,7 +222,6 @@
 				1D3822521153D0BE009D94C5 /* packet_stream.h */,
 				1D3822531153D0BE009D94C5 /* pending_connection.h */,
 				1D3822541153D0BE009D94C5 /* random_generator.h */,
-				1D3822551153D0BE009D94C5 /* scratch_pad.h */,
 				1D3822561153D0BE009D94C5 /* sockets.h */,
 				1D3822571153D0BE009D94C5 /* symmetric_cipher.h */,
 				1D3822581153D0BE009D94C5 /* time.h */,
