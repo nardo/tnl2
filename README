@@ -1,6 +1,6 @@
 tnl2 - Torque Network Library version 2
 
-tnl2 is a high-level networking API for real-time simulations with primitives for remote procedure call and object state replication.  tnl2 relies on the torque sockets network library for low-level networking support.
+tnl2 is a high-level networking API for real-time simulations with primitives for remote procedure call and object state replication.  tnl2 relies on the torque sockets network library for low-level networking support.  For tnl2 to build, torque_sockets must be in the same local parent directory.  torque_sockets can be found at: http://github.com/nardo/torque_sockets
 
 Directory structure overview:
 
