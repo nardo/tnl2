@@ -171,6 +171,7 @@ public:
 	/// on_ghost_add is called on the client side of a connection after the constructor and after the first data update.
 	virtual bool on_ghost_add(ghost_connection *the_connection)
 	{
+		return true;
 	}
 	
 	/// on_ghost_remove is called on the client side before the destructor when ghost has gone out of scope and is about to be deleted from the client.

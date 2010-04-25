@@ -14,10 +14,10 @@ class net_interface : public ref_object
 	};
 	
 public:
-	void set_private_key(net::asymmetric_key_ptr the_key)
+	void set_key_pair(net::asymmetric_key_ptr the_key)
 	{
 		byte_buffer_ptr key_buffer = the_key->get_private_key();
-		torque_socket_set_private_key(_socket, key_buffer->get_buffer_size(), key_buffer->get_buffer());
+		torque_socket_set_key_pair(_socket, key_buffer->get_buffer_size(), key_buffer->get_buffer());
 		
 		//byte_buffer_ptr private_key = the_key->get_private_key();
 		//torque_socket_set_private_key(_socket, private_key->get_buffer_size(), private_key->get_buffer());
@@ -53,9 +53,6 @@ public:
 					break;
 				case torque_connection_accepted_event_type:
 					_process_connection_accepted(event);
-					break;
-				case torque_connection_rejected_event_type:
-					_process_connection_rejected(event);
 					break;
 				case torque_connection_timed_out_event_type:
 					_process_connection_timed_out(event);
@@ -200,7 +197,7 @@ public:
 		type_record *rec = find_connection_type(type_identifier);
 		if(!rec)
 		{
-			torque_socket_disconnect(_socket, event->connection, 0, 0);
+			torque_socket_close_connection(_socket, event->connection, 0, 0);
 		}
 		net_connection *allocated = (net_connection *) operator new(rec->size);
 		rec->construct_object(allocated);
@@ -213,7 +210,7 @@ public:
 			torque_socket_accept_connection(_socket, event->connection);
 		}
 		else
-			torque_socket_disconnect(_socket, event->connection, response_stream.get_next_byte_position(), response_stream.get_buffer() );
+			torque_socket_close_connection(_socket, event->connection, response_stream.get_next_byte_position(), response_stream.get_buffer() );
 	}
 	
 	void _process_arranged_connection_request(torque_socket_event *event)
@@ -340,7 +337,8 @@ public:
 	{
 		sockaddr sa_bind_address;
 		bind_address.to_sockaddr(&sa_bind_address);
-		_socket = torque_socket_create(&sa_bind_address);
+		_socket = torque_socket_create(false, 0, 0);
+		torque_socket_bind(_socket, &sa_bind_address);
 
 		_dirty_list_head._next_dirty_list = &_dirty_list_tail;
 		_dirty_list_tail._prev_dirty_list = &_dirty_list_head;
