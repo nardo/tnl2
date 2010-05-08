@@ -119,7 +119,7 @@ public:
 		glClearColor(_color, _color, 0, 1);
 		glClear(GL_COLOR_BUFFER_BIT);
 		
-		tnl_test::test_game_render_frame_open_gl(0);
+		tnl_test::test_game_render_frame_open_gl(_game);
 		
 		glFlush();
 		
@@ -130,7 +130,37 @@ public:
 	
 	core::int16 handle_event(void *event)
 	{
-		return 0;
+		NPPepperEvent* npevent = reinterpret_cast<NPPepperEvent*>(event);
+		tnl_test::position p;
+		switch (npevent->type) {
+			case NPEventType_MouseDown:
+				p.x = npevent->u.mouse.x / float(_width);
+				p.y = npevent->u.mouse.y / float(_height);
+				logprintf("Got mouse click at (%d, %d) -> (%g, %g)", npevent->u.mouse.x, npevent->u.mouse.y, float(p.x), float(p.y));
+				_game->move_my_player_to(p);
+				break;
+			case NPEventType_MouseUp:
+			case NPEventType_MouseMove:
+			case NPEventType_MouseEnter:
+			case NPEventType_MouseLeave:
+				break;
+			case NPEventType_MouseWheel:
+				break;
+			case NPEventType_RawKeyDown:
+			case NPEventType_KeyDown:
+			case NPEventType_KeyUp:
+				break;
+			case NPEventType_Char:
+				break;
+			case NPEventType_Minimize:
+			case NPEventType_Focus:
+			case NPEventType_Device:
+				break;
+			case NPEventType_Undefined:
+			default:
+				break;
+		}
+		return 1;
 	}
 	
 	bool module_ready()
