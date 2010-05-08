@@ -1,25 +1,33 @@
-<HTML>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <HEAD>
 <TITLE>Torque Network Library 2.0 Test in Native Client</TITLE>
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Expires" CONTENT="-1">
 
 <script type="text/javascript">
-
+<!--
 var nacl_elt;
 
 // Before scripting the loaded module, ensure the Native Client module is loaded.
 var startupTimeout;
 
-var PostLoadInit = function() {
-  if (nacl_elt.__moduleReady == 1) {
-    clearTimeout(startupTimeout);
-    nacl_elt.focus();
-  } else {
-    if (nacl_elt.__moduleReady == undefined) {
-      alert('The Native Client plugin was unable to load');
-      return;
-    }
-    startupTimeout = setTimeout(PostLoadInit, 100);
-  }
+var PostLoadInit = function()
+{
+	try
+	{
+		var embed = document.getElementById("embed1");
+		var ready = embed.module_ready();
+		clearTimeout(startupTimeout);
+		alert('The Native Client plugin is ready');
+		return;
+	}
+	catch(e)
+	{
+		// do nothing
+	}
+	startupTimeout = setTimeout(PostLoadInit, 100);
 }
 
 // Init is called when the document has completed loading.  It downloads the
@@ -31,7 +39,7 @@ var Init = function() {
   PostLoadInit();
 }
 
-
+-->
 </script>
 
 </HEAD>
@@ -49,13 +57,8 @@ var Init = function() {
   <a href="http://www.libtnl.com/">http://www.libtnl.com/</a>
   for more information about the Torque Network Library.
  </p>
-<embed id="embed1" src="nacl_test_tnl2.nexe" type="application/x-nacl-srpc" width=512 height=512>
+<embed id="embed1" src="nacl_test_tnl2_release.nexe" type="application/x-nacl-srpc" width=512 height=512>
 <br>
-
-<script>
-var embed1 = document.getElementById('embed1');
-</script>
-
 
 </BODY>
 </HTML>

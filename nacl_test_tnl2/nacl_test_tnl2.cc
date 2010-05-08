@@ -1,171 +1,161 @@
-#include <errno.h>
-#include <stdio.h>
+//#include <nacl/nacl_av.h>
+//#include <nacl/nacl_srpc.h>
 #include <stdlib.h>
-#include <nacl/nacl_av.h>
-#include <nacl/nacl_srpc.h>
+#include <stdio.h>
+#include <nacl/nacl_npapi.h>
+#include <nacl/npruntime.h>
+#include <nacl/npapi_extensions.h>
+#include <nacl/npupp.h>
+#include <pgl/pgl.h>
+#include <GLES2/gl2.h>
 
 #include "test_tnl2.h"
+#include "plugin_framework/plugin_framework.h"
+#include "third_party/npapi/bindings/npapi_extensions_private.h"
 
-// global properties used to setup demo
-static const int kMaxWindow = 4096;
-static const int kMaxFrames = 10000000;
-static int g_window_width = 512;
-static int g_window_height = 512;
-static int g_num_frames = 9999;
+const int32_t kCommandBufferSize = 1024 * 1024;
+NPExtensions* extensions = NULL;
 
-// Simple Surface structure to hold a raster rectangle
-struct Surface {
-  int width, height, pitch;
-  uint32_t *pixels;
-  Surface(int w, int h) { width = w;
-                          height = h;
-                          pitch = w;
-                          pixels = new uint32_t[width * height]; }
-  ~Surface() { delete[] pixels; }
+class tnl_test_instance : public scriptable_object
+{
+public:
+	core::string bind_address;
+	float _color;
+	int _width, _height;
+	NPDeviceContext3D _context3d;
+	NPDevice* _device3d;
+	PGLContext _pgl_context;
+	tnl_test::test_game *_game;
+	
+	tnl_test_instance()
+	{
+		_color = 0;
+		SOCKADDR addr;
+		
+		_game = new tnl_test::test_game(true, addr, addr);
+	}
+	
+	~tnl_test_instance()
+	{
+		delete _game;
+		destroy_context();
+	}
+	
+	void init(NPMIMEType pluginType, core::int16 argc, char* argn[], char* argv[])
+	{
+		if (!extensions) {
+			browser->getvalue(get_plugin_instance(), NPNVPepperExtensions,
+							  reinterpret_cast<void*>(&extensions));
+			// CHECK(extensions);
+		}
+		
+		_device3d = extensions->acquireDevice(get_plugin_instance(), NPPepper3DDevice);
+		if (_device3d == NULL) {
+			printf("Failed to acquire 3DDevice\n");
+			exit(1);
+		}
+	}
+	
+	void set_window(NPWindow *window)
+	{
+		_width = window->width;
+		_height = window->height;
+		
+		if(!_pgl_context)
+			init_context();
+		browser->pluginthreadasynccall(get_plugin_instance(), tick_callback, this);
+	}
+	
+	void init_context()
+	{
+		// Initialize a 3D context.
+		NPDeviceContext3DConfig config;
+		config.commandBufferSize = kCommandBufferSize;
+		NPError err = _device3d->initializeContext(get_plugin_instance(), &config, &_context3d);
+		if (err != NPERR_NO_ERROR) {
+			printf("Failed to initialize 3D context\n");
+			exit(1);
+		}
+		
+		// Create a PGL context.
+		_pgl_context = pglCreateContext(get_plugin_instance(), _device3d, &_context3d);
+		
+		// Initialize the demo GL state.
+		pglMakeCurrent(_pgl_context);
+		pglMakeCurrent(NULL);
+	}
+	
+	void destroy_context()
+	{
+		// Destroy the PGL context.
+		pglDestroyContext(_pgl_context);
+		_pgl_context = NULL;
+		
+		// Destroy the Device3D context.
+		_device3d->destroyContext(get_plugin_instance(), &_context3d);				
+	}	
+	
+	static void tick_callback(void *data)
+	{
+		static_cast<tnl_test_instance *>(data)->tick();
+	}
+
+	void tick()
+	{
+		_game->tick();
+		
+		logprintf("hit draw (%d, %d)", _width, _height);
+		if(!pglMakeCurrent(_pgl_context) && pglGetError() == PGL_CONTEXT_LOST)
+		{
+			destroy_context();
+			init_context();
+			pglMakeCurrent(_pgl_context);
+		}
+		
+		glViewport(0, 0, _width, _height);
+		_color += 0.05;
+		if(_color > 1)
+			_color = 0;
+		glClearColor(_color, _color, 0, 1);
+		glClear(GL_COLOR_BUFFER_BIT);
+		
+		tnl_test::test_game_render_frame_open_gl(0);
+		
+		glFlush();
+		
+		pglSwapBuffers();
+		pglMakeCurrent(NULL);
+		browser->pluginthreadasynccall(get_plugin_instance(), tick_callback, this);
+	}
+	
+	core::int16 handle_event(void *event)
+	{
+		return 0;
+	}
+	
+	bool module_ready()
+	{
+		return true;
+	}
+	
+	static void register_class(type_database &db)
+	{
+		tnl_begin_class(db, tnl_test_instance, scriptable_object, true);
+		tnl_method(db, tnl_test_instance, module_ready);
+		tnl_end_class(db);		
+	}
 };
 
-
-// Drawing class holds information and functionality needed to render
-class DrawingDemo {
- public:
-  void Display();
-  void Update();
-  bool PollEvents();
-  explicit DrawingDemo(Surface *s);
-  ~DrawingDemo();
-
- private:
-  Surface *surf_;
-};
-
-
-// This update loop is run once per frame.
-// AGG renders straight into the DrawingDemo's surf_ pixel array.
-void DrawingDemo::Update() {
+void plugin_initialize()
+{
+	pglInitialize();
+	ltc_mp = ltm_desc;
+	tnl_test_instance::register_class(global_type_database());
+	global_plugin.add_class(get_global_type_record<tnl_test_instance>());
+	global_plugin.set_plugin_class(get_global_type_record<tnl_test_instance>());
 }
 
-
-// Displays software rendered image on the screen
-void DrawingDemo::Display() {
-  int r;
-  r = nacl_video_update(surf_->pixels);
-  if (-1 == r) {
-    printf("nacl_video_update() returned %d\n", errno);
-  }
-}
-
-
-// Polls events and services them.
-bool DrawingDemo::PollEvents() {
-  NaClMultimediaEvent event;
-  while (0 == nacl_video_poll_event(&event)) {
-    if (event.type == NACL_EVENT_QUIT) {
-      return false;
-    }
-  }
-  return true;
-}
-
-
-// Sets up and initializes DrawingDemo.
-DrawingDemo::DrawingDemo(Surface *surf) {
-  surf_ = surf;
-}
-
-
-// Frees up resources.
-DrawingDemo::~DrawingDemo() {
-}
-
-
-// Runs the demo and animate the image for kNumFrames
-void RunDemo(Surface *surface) {
-  DrawingDemo demo(surface);
-
-  for (int i = 0; i < g_num_frames; ++i) {
-    demo.Update();
-    demo.Display();
-    printf("Frame: %04d\b\b\b\b\b\b\b\b\b\b\b", i);
-    fflush(stdout);
-    if (!demo.PollEvents())
-      break;
-  }
-}
-
-
-// Initializes a window buffer.
-Surface* Initialize() {
-  int r;
-  int width;
-  int height;
-  r = nacl_multimedia_init(NACL_SUBSYSTEM_VIDEO | NACL_SUBSYSTEM_EMBED);
-  if (-1 == r) {
-    printf("Multimedia system failed to initialize!  errno: %d\n", errno);
-    exit(-1);
-  }
-  // if this call succeeds, use width & height from embedded html
-  r = nacl_multimedia_get_embed_size(&width, &height);
-  if (0 == r) {
-    g_window_width = width;
-    g_window_height = height;
-  }
-  r = nacl_video_init(g_window_width, g_window_height);
-  if (-1 == r) {
-    printf("Video subsystem failed to initialize!  errno; %d\n", errno);
-    exit(-1);
-  }
-  Surface *surface = new Surface(g_window_width, g_window_height);
-  return surface;
-}
-
-
-// Frees window buffer.
-void Shutdown(Surface *surface) {
-  delete surface;
-  nacl_video_shutdown();
-  nacl_multimedia_shutdown();
-}
-
-
-// If user specified options on cmd line, parse them
-// here and update global settings as needed.
-void ParseCmdLineArgs(int argc, char **argv) {
-  // look for cmd line args
-  if (argc > 1) {
-    for (int i = 1; i < argc; i++) {
-      if (argv[i][0] == '-' && argv[i][1] == 'w') {
-        int w = atoi(&argv[i][2]);
-        if ((w > 0) && (w < kMaxWindow)) {
-          g_window_width = w;
-        }
-      } else if (argv[i][0] == '-' && argv[i][1] == 'h') {
-        int h = atoi(&argv[i][2]);
-        if ((h > 0) && (h < kMaxWindow)) {
-          g_window_height = h;
-        }
-      } else if (argv[i][0] == '-' && argv[i][1] == 'f') {
-        int f = atoi(&argv[i][2]);
-        if ((f > 0) && (f < kMaxFrames)) {
-          g_num_frames = f;
-        }
-      } else {
-        printf("nacl_test_tnl2\n");
-        printf("usage: -w<n>   width of window.\n");
-        printf("       -h<n>   height of window.\n");
-        printf("       -f<n>   number of frames.\n");
-        printf("       --help  show this screen.\n");
-        exit(0);
-      }
-    }
-  }
-}
-
-
-// Parses cmd line options, initializes surface, runs the demo & shuts down.
-int main(int argc, char **argv) {
-  ParseCmdLineArgs(argc, argv);
-  Surface *surface = Initialize();
-  RunDemo(surface);
-  Shutdown(surface);
-  return 0;
+void plugin_shutdown()
+{
+	pglTerminate();
 }
