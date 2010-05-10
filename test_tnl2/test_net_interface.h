@@ -19,15 +19,19 @@ public:
 	test_game *_game; ///< The game object associated with this network interface.
 	
 	/// Constructor for this network interface, called from the constructor for test_game.  The constructor initializes and binds the network interface, as well as sets parameters for the associated game and whether or not it is a server.
-	test_net_interface(test_game *the_game, bool server, SOCKADDR &bind_address, SOCKADDR &ping_addr) : net_interface(bind_address)
+	test_net_interface(test_game *the_game, bool server, torque_socket_interface *socket_interface, void *user_data) : net_interface(socket_interface, user_data)
 	{
 		_game = the_game;
 		_is_server = server;
 		_pinging_servers = !server;
 		_last_ping_time = 0;
-		_ping_address = ping_addr;
 	}
 	
+	void set_ping_address(SOCKADDR &addr)
+	{
+		_ping_address = addr;		
+	}
+
 	test_game *get_game()
 	{
 		return _game;
@@ -46,7 +50,7 @@ public:
 			logprintf("%s - received ping.", from_string.c_str());
 			// we're a server, and we got a ping packet from a client, so send back a GamePingResponse to let the client know it has found a server.
 			core::write(write_stream, core::uint8(GamePingResponse));
-			torque_socket_send_to(_socket, &event->source_address, write_stream.get_byte_position(), write_stream.get_buffer());
+			get_socket_interface()->send_to(_socket, &event->source_address, write_stream.get_byte_position(), write_stream.get_buffer());
 			
 			logprintf("%s - sending ping response.", from_string.c_str());
 		}
@@ -71,7 +75,7 @@ public:
 		net::packet_stream write_stream;
 		
 		core::write(write_stream, core::uint8(GamePingRequest));
-		torque_socket_send_to(_socket, &_ping_address, write_stream.get_next_byte_position(), write_stream.get_buffer());
+		get_socket_interface()->send_to(_socket, &_ping_address, write_stream.get_next_byte_position(), write_stream.get_buffer());
 
 		string ping_address_string = net::address(_ping_address).to_string();
 		logprintf("%s - sending ping.", ping_address_string.c_str());

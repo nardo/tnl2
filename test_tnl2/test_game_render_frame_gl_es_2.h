@@ -191,5 +191,4 @@ static void test_game_render_frame_open_gl(test_game *the_game)
 		box(render_vertices, p->_render_pos.x - 0.01f, p->_render_pos.y - 0.01f, p->_render_pos.x + 0.01f, p->_render_pos.y + 0.01f);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	}
-	logprintf("finished draw.");
 }

@@ -1,4 +1,6 @@
 *.o
+*.nexe
+*.a
 tnl2_test/moc_*
 tnl2_test/tnl2_test.app
 tnl2_test/tnl2_test.pro.*

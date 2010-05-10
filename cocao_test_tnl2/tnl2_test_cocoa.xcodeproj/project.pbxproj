@@ -14,6 +14,7 @@
 		1D38228E1153D404009D94C5 /* tnl2_test_view.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D38228D1153D404009D94C5 /* tnl2_test_view.m */; };
 		1DA782FE116058F800FB41C2 /* test_game.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1DA782F9116058F800FB41C2 /* test_game.cpp */; };
 		1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1DDD58140DA1D0A300B32029 /* MainMenu.xib */; };
+		1DE40B5A1197A1B600373D23 /* nacl_test_tnl2.html in Resources */ = {isa = PBXBuildFile; fileRef = 1DE40B581197A1B600373D23 /* nacl_test_tnl2.html */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
@@ -23,6 +24,9 @@
 		089C165DFE840E0CC02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
+		1D1536A81197AB490060CE24 /* socket_event_queue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = socket_event_queue.h; path = ../../torque_sockets/torque_sockets/socket_event_queue.h; sourceTree = SOURCE_ROOT; };
+		1D1537391197D1CF0060CE24 /* test_tnl2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = test_tnl2.h; path = ../test_tnl2/test_tnl2.h; sourceTree = SOURCE_ROOT; };
+		1D1537871197DCF00060CE24 /* test_game_render_frame_gl_es_2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = test_game_render_frame_gl_es_2.h; path = ../test_tnl2/test_game_render_frame_gl_es_2.h; sourceTree = SOURCE_ROOT; };
 		1D3822241153D0A7009D94C5 /* algorithm_templates.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = algorithm_templates.h; path = ../../torque_sockets/core/algorithm_templates.h; sourceTree = SOURCE_ROOT; };
 		1D3822251153D0A7009D94C5 /* array.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = array.h; path = ../../torque_sockets/core/array.h; sourceTree = SOURCE_ROOT; };
 		1D3822261153D0A7009D94C5 /* assert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = assert.h; path = ../../torque_sockets/core/assert.h; sourceTree = SOURCE_ROOT; };
@@ -117,6 +121,8 @@
 		1DAD5F8A118E647C008301BF /* prcpucfg_win32.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = prcpucfg_win32.h; path = ../../torque_sockets/plugin_framework/prcpucfg_win32.h; sourceTree = SOURCE_ROOT; };
 		1DAD5F8B118E647C008301BF /* prtypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = prtypes.h; path = ../../torque_sockets/plugin_framework/prtypes.h; sourceTree = SOURCE_ROOT; };
 		1DDD58150DA1D0A300B32029 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		1DE40B571197A1B600373D23 /* nacl_test_tnl2.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = nacl_test_tnl2.cc; path = ../nacl_test_tnl2/nacl_test_tnl2.cc; sourceTree = SOURCE_ROOT; };
+		1DE40B581197A1B600373D23 /* nacl_test_tnl2.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; name = nacl_test_tnl2.html; path = ../nacl_test_tnl2/nacl_test_tnl2.html; sourceTree = SOURCE_ROOT; };
 		1DF3DCCB117A822E008F7A78 /* chat_example.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; name = chat_example.html; path = ../../torque_sockets/products/TorqueSocketsPlugin/chat_example.html; sourceTree = SOURCE_ROOT; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
@@ -245,6 +251,7 @@
 				1D3822581153D0BE009D94C5 /* time.h */,
 				1D3822591153D0BE009D94C5 /* torque_connection.h */,
 				1D38225A1153D0BE009D94C5 /* torque_socket.h */,
+				1D1536A81197AB490060CE24 /* socket_event_queue.h */,
 				1D38225B1153D0BE009D94C5 /* torque_sockets.h */,
 				1D38225C1153D0BE009D94C5 /* torque_sockets_c_api.h */,
 				1D38225D1153D0BE009D94C5 /* torque_sockets_c_implementation.h */,
@@ -265,6 +272,15 @@
 				1D3822651153D0CD009D94C5 /* tnl2.h */,
 			);
 			name = tnl2;
+			sourceTree = "<group>";
+		};
+		1D8E3DF611979B940052219B /* nacl_tnl2_and_pepper */ = {
+			isa = PBXGroup;
+			children = (
+				1DE40B571197A1B600373D23 /* nacl_test_tnl2.cc */,
+				1DE40B581197A1B600373D23 /* nacl_test_tnl2.html */,
+			);
+			name = nacl_tnl2_and_pepper;
 			sourceTree = "<group>";
 		};
 		1DAD5F7E118E645E008301BF /* plugin_framework */ = {
@@ -290,6 +306,7 @@
 		29B97314FDCFA39411CA2CEA /* tnl2_test_cocoa */ = {
 			isa = PBXGroup;
 			children = (
+				1D8E3DF611979B940052219B /* nacl_tnl2_and_pepper */,
 				1DAD5F7E118E645E008301BF /* plugin_framework */,
 				1D38227A1153D2B5009D94C5 /* libtommath.a */,
 				1D3822781153D2A1009D94C5 /* libtomcrypt.a */,
@@ -309,6 +326,8 @@
 		29B97315FDCFA39411CA2CEA /* test_tnl2 */ = {
 			isa = PBXGroup;
 			children = (
+				1D1537871197DCF00060CE24 /* test_game_render_frame_gl_es_2.h */,
+				1D1537391197D1CF0060CE24 /* test_tnl2.h */,
 				1DA782F7116058F800FB41C2 /* test_building.h */,
 				1DA782F8116058F800FB41C2 /* test_connection.h */,
 				1DA782F9116058F800FB41C2 /* test_game.cpp */,
@@ -386,6 +405,7 @@
 			files = (
 				8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
 				1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */,
+				1DE40B5A1197A1B600373D23 /* nacl_test_tnl2.html in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

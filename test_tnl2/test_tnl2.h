@@ -13,7 +13,6 @@ namespace core
 		#include "torque_sockets/torque_sockets.h"
 	};
 };
-#include "torque_sockets/torque_sockets_c_implementation.h"
 namespace core
 {
 	struct tnl {

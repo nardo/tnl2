@@ -6,42 +6,9 @@
 <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <META HTTP-EQUIV="Expires" CONTENT="-1">
 
-<script type="text/javascript">
-<!--
-var nacl_elt;
-
-// Before scripting the loaded module, ensure the Native Client module is loaded.
-var startupInterval;
-
-var PostLoadInit = function()
-{
-	try
-	{
-		var embed = document.getElementById("embed1");
-		var ready = embed.module_ready();
-		clearInterval(startupInterval);
-		alert('The Native Client plugin is ready');
-		return;
-	}
-	catch(e)
-	{
-		// do nothing
-	}
-}
-
-// Init is called when the document has completed loading.  It downloads the
-// NativeClient modules.
-var Init = function()
-{
-	startupInterval = setInterval("PostLoadInit()", 100);
-}
-
--->
-</script>
-
 </HEAD>
-<BODY id="bodyId" onload="Init();" >
-
+<BODY id="bodyId" onload="post_load_init();" >
+<object type="application/x-torque-socket" id="torque_socket_plugin" width="0" height="0"> </object>
 <h1>test_tnl2 embedded in a web page</h1>
  <p>
   You should a yellow box below, representing a server game world.  Red rectangles represent buildings in 
@@ -51,8 +18,47 @@ var Init = function()
   This demo uses the open source Torque Network Library, which
   provides high performance real-time networking for games and simulations.
  </p>
-<embed id="embed1" src="nacl_test_tnl2.nexe" type="application/x-nacl-srpc" width=400 height=400>
+<embed id="tnl_test" src="nacl_test_tnl2.nexe" type="application/x-nacl-srpc" width=400 height=400>
 <br>
+<script type="text/javascript">
+
+var tick_game = function()
+{
+	var tnl_test = document.getElementById("tnl_test");
+	tnl_test.tick();
+	setTimeout("tick_game();", 10);
+}
+
+// Before scripting the loaded module, ensure the Native Client module is loaded.
+var post_load_init = function()
+{
+	var init_check_timeout = setTimeout("post_load_init();", 100);
+	var torque_socket_plugin = document.getElementById("torque_socket_plugin");
+	var tnl_test = document.getElementById("tnl_test");
+	torque_socket_plugin.message("FOOOOOO!" + tnl_test.__moduleReady);
+	if(tnl_test.__moduleReady == 1)
+	{
+		torque_socket_plugin.message("Module Ready!");
+		clearTimeout(init_check_timeout);
+		alert('The Native Client plugin is ready');
+		
+		var socket_instance = torque_socket_plugin.create_torque_socket();
+		tnl_test.socket_instance = socket_instance;
+		tnl_test.activate_socket();
+		socket_instance.on_challenge_response = function(connection, key, message) { tnl_test.on_challenge_response(connection, key, message); }
+		socket_instance.on_connect_request = function(connection, key, message) { tnl_test.on_connect_request(connection, key, message); }
+		socket_instance.on_established = function(connection) { tnl_test.on_established(connection); }
+		socket_instance.on_close = function(connection, reason) { tnl_test.on_close(connection, reason); }
+		socket_instance.on_socket_packet = function(address, packet) { tnl_test.on_socket_packet(address, packet); }
+		socket_instance.on_packet = function(connection, sequence, packet) { tnl_test.on_packet(connection, sequence, packet); }
+		socket_instance.on_packet_delivery_notify = function(connection, send_sequence, delivery_status) { tnl_test.on_packet_delivery_notify(connection, send_sequence, delivery_status); }
+		socket_instance.on_pong = function(str) { tnl_test.on_pong(str); }
+		socket_instance.ping("FOO ftw");
+		setTimeout("tick_game();", 1);
+	}
+}
+
+</script>
 
 </BODY>
 </HTML>

@@ -2,6 +2,8 @@
 
 #include <OpenGL/gl.h>
 #include "test_tnl2.h"
+#include "torque_sockets/torque_sockets_c_implementation.h"
+
 
 tnl_test::test_game *game[2] = { 0, 0 };
 
@@ -32,8 +34,11 @@ void restart_games(bool game_1_is_server, bool game_2_is_server)
 		a.set_port(0);
 		a.to_sockaddr(&interface_bind_address2);
 	}
-	game[0] = new tnl_test::test_game(game_1_is_server, interface_bind_address1, ping_address);
-	game[1] = new tnl_test::test_game(game_2_is_server, interface_bind_address2, ping_address);
+	game[0] = new tnl_test::test_game(game_1_is_server, ping_address, &g_torque_socket_interface, 0);
+	game[0]->_net_interface->bind(interface_bind_address1);
+	
+	game[1] = new tnl_test::test_game(game_2_is_server, ping_address, &g_torque_socket_interface, 0);
+	game[1]->_net_interface->bind(interface_bind_address2);
 }
 
 void click_game(int game_index, float x, float y)
@@ -80,7 +85,8 @@ extern "C"
 			a.set_port(0);
 		a.to_sockaddr(&interface_bind_address);
 		
-		g = new tnl_test::test_game(server, interface_bind_address, ping_address);
+		g = new tnl_test::test_game(server, ping_address, &g_torque_socket_interface, 0);
+		g->_net_interface->bind(interface_bind_address);
 		return g;
 	}
 	void shutdown_game(void *game)

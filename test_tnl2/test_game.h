@@ -17,10 +17,13 @@ public:
 		test_connection_identifier_token = 0xBEEF,
 	};
 	/// Constructor for test_game, determines whether this game will be a client or a server, and what addresses to bind to and ping.  If this game is a server, it will construct 50 random _buildings and 15 random AI _players to populate the "world" with.  test_game also constructs an AsymmetricKey to demonstrate establishing secure connections with clients and servers.
-	test_game(bool server, SOCKADDR &interface_bind_address, SOCKADDR &ping_address) : _type_database(&_context)
+	test_game(bool server, SOCKADDR &ping_address, torque_socket_interface *iface, void *user_data) : _type_database(&_context)
 	{
 		_is_server = server;
-		_net_interface = new test_net_interface(this, _is_server, interface_bind_address, ping_address);
+		_net_interface = new test_net_interface(this, _is_server, iface, user_data);
+		
+		_net_interface->set_ping_address(ping_address);
+		
 		_net_interface->add_connection_type<test_connection>(test_connection_identifier_token);
 
 		//TNL::AsymmetricKey *theKey = new TNL::AsymmetricKey(32);
