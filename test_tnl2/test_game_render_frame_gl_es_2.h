@@ -135,26 +135,33 @@ static void test_game_render_frame_open_gl(test_game *the_game)
 	glClearColor(1, 1, 0, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-   	
-	/*if(the_game->_client_player)
+	enum {
+		circle_vert_count = 30,
+	};
+	GLfloat circle_verts[3 * (circle_vert_count + 1)];
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, circle_verts);
+
+	if(the_game->_client_player)
 	{
 		position p = the_game->_client_player->_render_pos;
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glBegin(GL_POLYGON);
-		glColor4f(0.5f, 0.5f, 0.5f, 0.65f);
-		for(float32 r = 0; r < 3.1415 * 2; r += 0.1f)
+		for(uint32 i = 0; i < (circle_vert_count+1); i++)
 		{
-			glVertex2f(p.x + 0.25f * cos(r), p.y + 0.25f * sin(r));
+			float r = (i / float(circle_vert_count)) * 3.1415 * 2;
+			GLfloat *v = circle_verts + i * 3;
+			v[0] = (p.x + 0.25f * cos(r)) * 2 - 1;
+			v[1] = 1 - (p.y + 0.25f * sin(r)) * 2;
+			v[2] = 0;
 		}
-		
-		glEnd();
+		glUniform4f(color_loc, 0.5, 0.5, 0.5, 0.65);
+		glDrawArrays(GL_TRIANGLE_FAN, 0,circle_vert_count - 1);
 		glDisable(GL_BLEND);
-	}*/
+	}
 	
 	GLfloat render_vertices[12];
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, render_vertices);
-	glEnableVertexAttribArray(0);
 	
 	// then draw all the _buildings.
 	glUniform4f(color_loc, 1, 0, 0, 1);

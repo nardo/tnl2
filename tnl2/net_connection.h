@@ -165,6 +165,8 @@ public:
 	/// If force is true and there is space in the window, it will always send a packet.
 	void check_packet_send(bool force, net::time current_time)
 	{
+		if(window_full() || !is_data_to_transmit())
+			return;
 		net::time delay = net::time( _current_packet_send_period );
 		
 		if(!force)
@@ -177,8 +179,6 @@ public:
 				_send_delay_credit = net::time(1000);
 		}
 		prepare_write_packet();
-		if(window_full() || !is_data_to_transmit())
-			return;
 		net::packet_stream stream(_current_packet_send_size);
 		_last_update_time = current_time;
 		
@@ -308,7 +308,7 @@ public:
 	
 	bool window_full()
 	{
-		return _notify_queue_head && (_last_send_sequence - _notify_queue_head->sequence >= torque_sockets_packet_window_size);
+		return _notify_queue_head && (_last_send_sequence - _notify_queue_head->sequence >= torque_sockets_packet_window_size - 2);
 	}
 			
 			
@@ -365,7 +365,7 @@ public:
 protected:
 	enum rate_defaults {
 		default_fixed_bandwidth = 2500, ///< The default send/receive bandwidth - 2.5 Kb per second.
-		default_fixed_send_period = 96, ///< The default delay between each packet send - approx 10 packets per second.
+		default_fixed_send_period = 200, ///< The default delay between each packet send - approx 5 packets per second.
 		max_fixed_bandwidth = 65535, ///< The maximum bandwidth for a connection using the fixed rate transmission method.
 		max_fixed_send_period = 2047, ///< The maximum period between packets in the fixed rate send transmission method.
 	};
